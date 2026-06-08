@@ -19,14 +19,12 @@ function TelegramInit() {
   const initialized = useRef(false);
 
   useEffect(() => {
-    // Only run once on mount
     if (initialized.current) return;
     initialized.current = true;
 
     const tg = (window as any).Telegram?.WebApp;
     const isTelegramApp = !!tg?.initData;
 
-    // Not in Telegram → redirect once
     if (!isTelegramApp) {
       const botName = process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || 'TON_pass_bot';
       const payMatch = window.location.pathname.match(/^\/pay\/(.+)$/);
@@ -38,7 +36,6 @@ function TelegramInit() {
       return;
     }
 
-    // Inside Telegram Mini App
     tg.ready();
     tg.expand();
 
@@ -47,14 +44,11 @@ function TelegramInit() {
     script.src = 'https://tganalytics.xyz/index.js';
     script.async = true;
     script.onload = () => {
-      (window as any).telegramAnalytics?.init({
-        token: TGA_TOKEN,
-        appName: 'ton_pass',
-      });
+      (window as any).telegramAnalytics?.init({ token: TGA_TOKEN, appName: 'ton_pass' });
     };
     document.head.appendChild(script);
 
-    // Handle startapp → route to pay page
+    // Handle startapp
     const startParam = tg.initDataUnsafe?.start_param;
     if (startParam?.startsWith('pay_')) {
       const slug = startParam.replace('pay_', '');
@@ -62,14 +56,12 @@ function TelegramInit() {
         router.replace(`/pay/${slug}`);
       }
     }
-  }, []); // Empty deps - run only once on mount
+  }, []);
 
-  // Auto-login - separate effect
   useEffect(() => {
     if (status !== 'unauthenticated') return;
     const tg = (window as any).Telegram?.WebApp;
     if (!tg?.initDataUnsafe?.user) return;
-
     const user = tg.initDataUnsafe.user;
     signIn('telegram', {
       id: String(user.id),
@@ -100,7 +92,30 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <TonConnectUIProvider
             manifestUrl={manifestUrl}
             actionsConfiguration={{
-              twaReturnUrl: 'https://t.me/TON_pass_bot/tps',
+              twaReturnUrl: 'https://t.me/TON_pass_bot/tps' as `${string}://${string}`,
+            }}
+            walletsListConfiguration={{
+              includeWallets: [
+                {
+                  appName: 'telegram-wallet',
+                  name: 'Wallet',
+                  imageUrl: 'https://wallet.tg/images/logo-288.png',
+                  aboutUrl: 'https://wallet.tg/',
+                  universalLink: 'https://t.me/wallet?attach=wallet',
+                  bridgeUrl: 'https://bridge.tonapi.io/bridge',
+                  platforms: ['ios', 'android', 'macos', 'windows', 'linux'],
+                },
+                {
+                  appName: 'tonkeeper',
+                  name: 'Tonkeeper',
+                  imageUrl: 'https://tonkeeper.com/assets/tonconnect-icon.png',
+                  aboutUrl: 'https://tonkeeper.com',
+                  universalLink: 'https://app.tonkeeper.com/ton-connect',
+                  deepLink: 'tonkeeper://ton-connect',
+                  bridgeUrl: 'https://bridge.tonapi.io/bridge',
+                  platforms: ['ios', 'android', 'chrome', 'firefox', 'macos'],
+                },
+              ],
             }}
           >
             <TelegramInit />
