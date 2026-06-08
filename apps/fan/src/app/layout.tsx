@@ -5,7 +5,7 @@ import { SessionProvider } from 'next-auth/react';
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 import { useEffect } from 'react';
 import { signIn, useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 const manifestUrl =
   process.env.NEXT_PUBLIC_TONCONNECT_MANIFEST_URL ||
@@ -16,11 +16,26 @@ const TGA_TOKEN = 'eyJhcHBfbmFtZSI6InRvbl9wYXNzIiwiYXBwX3VybCI6Imh0dHBzOi8vdC5tZ
 function TelegramInit() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     const tg = (window as any).Telegram?.WebApp;
-    if (!tg) return;
+    const isTelegramApp = !!tg?.initData;
 
+    // If NOT in Telegram Mini App → redirect to Telegram
+    if (!isTelegramApp) {
+      const botName = process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || 'TON_pass_bot';
+      // Extract slug from pay pages
+      const payMatch = pathname?.match(/^\/pay\/(.+)$/);
+      if (payMatch) {
+        window.location.replace(`https://t.me/${botName}/tps?startapp=pay_${payMatch[1]}`);
+      } else {
+        window.location.replace(`https://t.me/${botName}/tps`);
+      }
+      return;
+    }
+
+    // Inside Telegram Mini App
     tg.ready();
     tg.expand();
 
@@ -40,7 +55,7 @@ function TelegramInit() {
     const startParam = tg.initDataUnsafe?.start_param;
     if (startParam?.startsWith('pay_')) {
       const slug = startParam.replace('pay_', '');
-      if (!window.location.pathname.startsWith('/pay/')) {
+      if (!pathname?.startsWith('/pay/')) {
         router.replace(`/pay/${slug}`);
         return;
       }
@@ -61,7 +76,7 @@ function TelegramInit() {
         redirect: false,
       });
     }
-  }, [status, router]);
+  }, [status, router, pathname]);
 
   return null;
 }
