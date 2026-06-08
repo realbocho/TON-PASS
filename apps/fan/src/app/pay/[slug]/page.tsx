@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
+import { useTonConnectUI, useTonAddress, TonConnectButton } from '@tonconnect/ui-react';
 import { useParams } from 'next/navigation';
 import TelegramLoginButton from '@/components/TelegramLoginButton';
 
@@ -326,9 +326,14 @@ export default function PayPage() {
             )}
 
             {!walletAddress ? (
-              <button className="btn btn-ton btn-full btn-lg" onClick={() => tonConnectUI.openModal()}>
-                🔗 Connect TON Wallet
-              </button>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'stretch' }}>
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                  <TonConnectButton style={{ width: '100%' }} />
+                </div>
+                <button className="btn btn-ton btn-full btn-lg" onClick={() => tonConnectUI.openModal()}>
+                  🔗 Connect TON Wallet
+                </button>
+              </div>
             ) : (
               <div>
                 <div style={{
