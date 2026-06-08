@@ -44,16 +44,10 @@ export default function PayPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    // If opened in browser (not Telegram Mini App), redirect to Telegram
-    const tg = (window as any).Telegram?.WebApp;
-    if (!tg || !tg.initData) {
-      const botName = process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || 'TON_pass_bot';
-      window.location.href = `https://t.me/${botName}/tps?startapp=pay_${slug}`;
-      return;
+    if (typeof window !== 'undefined') {
+      const tg = (window as any).Telegram?.WebApp;
+      if (tg) { tg.ready(); tg.expand(); }
     }
-
-    tg.ready();
-    tg.expand();
 
     fetchCreator();
     fetch('/api/fan/view', {
