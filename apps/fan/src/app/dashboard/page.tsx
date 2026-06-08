@@ -44,10 +44,14 @@ export default function DashboardPage() {
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp) {
-      (window as any).Telegram.WebApp.ready();
-      (window as any).Telegram.WebApp.expand();
+    const tg = (window as any).Telegram?.WebApp;
+    if (!tg || !tg.initData) {
+      const botName = process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || 'TON_pass_bot';
+      window.location.href = `https://t.me/${botName}/app`;
+      return;
     }
+    tg.ready();
+    tg.expand();
   }, []);
 
   const fetchData = useCallback(async () => {
