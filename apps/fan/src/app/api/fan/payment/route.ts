@@ -10,7 +10,7 @@ const PLATFORM_WALLET = 'UQAfdeijx6QgEcO97eVfSsTYtC20_-bfLePj7Bl2162XIkjG';
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.telegramId) {
+  if (!session?.user?.twitterId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -52,8 +52,8 @@ export async function POST(req: NextRequest) {
     .insert({
       creator_id: creator.id,
       fan_twitter_id: session.user.telegramId,
-      fan_twitter_username: session.user.twitterUsername,
-      fan_twitter_avatar: session.user.twitterAvatar,
+      fan_twitter_username: session.user.telegramUsername,
+      fan_twitter_avatar: session.user.telegramAvatar,
       amount_ton: fees.amount,
       fee_ton: fees.fee,
       total_ton: fees.total,
