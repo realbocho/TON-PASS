@@ -76,7 +76,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <SessionProvider>
-          <TonConnectUIProvider manifestUrl={manifestUrl}>
+          <TonConnectUIProvider
+            manifestUrl={manifestUrl}
+            actionsConfiguration={{
+              twaReturnUrl: 'https://t.me/TON_pass_bot/tps',
+            }}
+          >
             <TelegramInit />
             {children}
           </TonConnectUIProvider>
