@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     .from('payments')
     .select('id, status')
     .eq('creator_id', creator.id)
-    .eq('fan_twitter_id', session.user.twitterId)
+    .eq('fan_twitter_id', session.user.telegramId)
     .in('status', ['pending_payment', 'pending_approval', 'approved'])
     .single();
 
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     .from('payments')
     .insert({
       creator_id: creator.id,
-      fan_twitter_id: session.user.twitterId,
+      fan_twitter_id: session.user.telegramId,
       fan_twitter_username: session.user.twitterUsername,
       fan_twitter_avatar: session.user.twitterAvatar,
       amount_ton: fees.amount,
