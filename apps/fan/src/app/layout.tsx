@@ -36,7 +36,12 @@ function TelegramInit() {
     document.head.appendChild(script);
 
     // Handle startapp via initDataUnsafe (middleware handles URL params)
-    const startParam = tg.initDataUnsafe?.start_param || '';
+    const urlParams = new URLSearchParams(window.location.search);
+    const startParam = 
+      tg.initDataUnsafe?.start_param ||
+      urlParams.get('tgWebAppStartParam') ||
+      urlParams.get('startapp') ||
+      '';
     if (startParam.startsWith('p-')) {
       const slug = startParam.replace('p-', '');
       if (!window.location.pathname.startsWith('/pay/')) {
