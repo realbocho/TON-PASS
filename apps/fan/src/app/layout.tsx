@@ -36,13 +36,14 @@ function TelegramInit() {
     };
     document.head.appendChild(script);
 
-    // Handle startapp parameter - redirect to pay page
+    // Handle startapp parameter - redirect to pay page (only once)
     const startParam = tg?.initDataUnsafe?.start_param;
     if (startParam?.startsWith('pay_')) {
       const slug = startParam.replace('pay_', '');
-      if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/pay/')) {
-        window.location.href = `/pay/${slug}`;
-        return;
+      const currentPath = window.location.pathname;
+      if (!currentPath.startsWith('/pay/') && currentPath !== `/pay/${slug}`) {
+        window.history.replaceState({}, '', `/pay/${slug}`);
+        window.dispatchEvent(new PopStateEvent('popstate'));
       }
     }
 
