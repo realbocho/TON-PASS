@@ -39,6 +39,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [creator, setCreator] = useState<any>(null);
+  const [copied, setCopied] = useState(false);
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
 
@@ -127,6 +128,8 @@ export default function DashboardPage() {
   function copyLink() {
     if (creator?.link_slug) {
       navigator.clipboard?.writeText(`${baseUrl}/pay/${creator.link_slug}`);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
   }
 
@@ -182,8 +185,8 @@ export default function DashboardPage() {
             <span style={{ fontSize: '11px', color: 'var(--text-muted)', flex: 1, fontFamily: 'JetBrains Mono', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {baseUrl}/pay/{creator.link_slug}
             </span>
-            <button className="btn btn-primary btn-sm" onClick={copyLink} style={{ flexShrink: 0 }}>
-              Copy Link
+            <button className="btn btn-primary btn-sm" onClick={copyLink} style={{ flexShrink: 0, minWidth: '80px' }}>
+              {copied ? '✓ Copied!' : 'Copy Link'}
             </button>
           </div>
         </div>
