@@ -5,6 +5,7 @@ import { SessionProvider } from 'next-auth/react';
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 import { useEffect } from 'react';
 import { signIn, useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 const manifestUrl =
   process.env.NEXT_PUBLIC_TONCONNECT_MANIFEST_URL ||
@@ -14,20 +15,19 @@ const TGA_TOKEN = 'eyJhcHBfbmFtZSI6InRvbl9wYXNzIiwiYXBwX3VybCI6Imh0dHBzOi8vdC5tZ
 
 function TelegramInit() {
   const { data: session, status } = useSession();
+  const router = useRouter();
 
   useEffect(() => {
-    // Init Telegram WebApp
     const tg = (window as any).Telegram?.WebApp;
-    if (tg) {
-      tg.ready();
-      tg.expand();
-    }
+    if (!tg) return;
+
+    tg.ready();
+    tg.expand();
 
     // Telegram Analytics
     const script = document.createElement('script');
     script.src = 'https://tganalytics.xyz/index.js';
     script.async = true;
-    script.type = 'text/javascript';
     script.onload = () => {
       (window as any).telegramAnalytics?.init({
         token: TGA_TOKEN,
@@ -36,19 +36,18 @@ function TelegramInit() {
     };
     document.head.appendChild(script);
 
-    // Handle startapp parameter - redirect to pay page (only once)
-    const startParam = tg?.initDataUnsafe?.start_param;
+    // Handle startapp → route to pay page
+    const startParam = tg.initDataUnsafe?.start_param;
     if (startParam?.startsWith('pay_')) {
       const slug = startParam.replace('pay_', '');
-      const currentPath = window.location.pathname;
-      if (!currentPath.startsWith('/pay/') && currentPath !== `/pay/${slug}`) {
-        window.history.replaceState({}, '', `/pay/${slug}`);
-        window.dispatchEvent(new PopStateEvent('popstate'));
+      if (!window.location.pathname.startsWith('/pay/')) {
+        router.replace(`/pay/${slug}`);
+        return;
       }
     }
 
     // Auto-login from Mini App
-    if (status === 'unauthenticated' && tg?.initDataUnsafe?.user) {
+    if (status === 'unauthenticated' && tg.initDataUnsafe?.user) {
       const user = tg.initDataUnsafe.user;
       signIn('telegram', {
         id: String(user.id),
@@ -62,7 +61,7 @@ function TelegramInit() {
         redirect: false,
       });
     }
-  }, [status]);
+  }, [status, router]);
 
   return null;
 }
