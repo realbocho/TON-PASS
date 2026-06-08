@@ -11,7 +11,7 @@ export default function HomePage() {
     const tg = (window as any).Telegram?.WebApp;
     if (!tg || !tg.initData) {
       const botName = process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || 'TON_pass_bot';
-      window.location.href = `https://t.me/${botName}/app`;
+      window.location.href = `https://t.me/${botName}/tps`;
       return;
     }
     tg.ready();
