@@ -123,6 +123,7 @@ export default function OnboardPage() {
             </div>
           </div>
         ))}
+      </div>
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
