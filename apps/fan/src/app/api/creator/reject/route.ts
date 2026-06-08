@@ -5,7 +5,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.twitterId) {
+  if (!session?.user?.telegramId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
