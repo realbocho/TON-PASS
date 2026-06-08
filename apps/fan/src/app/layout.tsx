@@ -39,8 +39,12 @@ function TelegramInit() {
 
     // Handle startapp → route to pay page
     const startParam = tg.initDataUnsafe?.start_param;
-    if (startParam?.startsWith('pay_')) {
-      const slug = startParam.replace('pay_', '');
+    console.log('TON-PASS startParam:', startParam);
+    console.log('TON-PASS initDataUnsafe:', JSON.stringify(tg.initDataUnsafe));
+    console.log('TON-PASS pathname:', window.location.pathname);
+    
+    if (startParam?.startsWith('p-')) {
+      const slug = startParam.replace('p-', '');
       if (!window.location.pathname.startsWith('/pay/')) {
         router.replace(`/pay/${slug}`);
       }
