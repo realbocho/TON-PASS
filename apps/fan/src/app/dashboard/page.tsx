@@ -44,13 +44,6 @@ export default function DashboardPage() {
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
 
   useEffect(() => {
-    const tg = (window as any).Telegram?.WebApp;
-    if (!tg?.initData && !sessionStorage.getItem('tg_redirected')) {
-      const botName = process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || 'TON_pass_bot';
-      sessionStorage.setItem('tg_redirected', '1');
-      window.location.href = `https://t.me/${botName}/tps`;
-      return;
-    }
   }, []);
 
   const fetchData = useCallback(async () => {
