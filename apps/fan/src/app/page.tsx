@@ -131,7 +131,7 @@ export default function HomePage() {
 
         {/* Feature pills */}
         <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '32px' }}>
-          {['No KYC', 'TON Chain', '10% Fee', 'Instant'].map(f => (
+          {['No KYC', 'TON Chain', '5% Fee', 'Instant'].map(f => (
             <span key={f} style={{
               padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 600,
               background: 'var(--bg-elevated)', border: '1px solid var(--border)',
