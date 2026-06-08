@@ -25,10 +25,6 @@ function TelegramInit() {
     const tg = (window as any).Telegram?.WebApp;
     if (!tg?.initData) return;
 
-    // Read startapp BEFORE tg.ready()
-    const startParam = tg.initDataUnsafe?.start_param || 
-      new URLSearchParams(window.location.search).get('tgWebAppStartParam') || '';
-
     tg.ready();
     tg.expand();
 
@@ -42,7 +38,15 @@ function TelegramInit() {
     document.head.appendChild(script);
 
     // Handle startapp → route to pay page
-    if (startParam?.startsWith('p-')) {
+    // Check both initDataUnsafe and URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    const startParam = 
+      tg.initDataUnsafe?.start_param ||
+      urlParams.get('tgWebAppStartParam') ||
+      urlParams.get('startapp') ||
+      '';
+
+    if (startParam && startParam.startsWith('p-')) {
       const slug = startParam.replace('p-', '');
       if (!window.location.pathname.startsWith('/pay/')) {
         router.replace(`/pay/${slug}`);
