@@ -123,7 +123,9 @@ export default function DashboardPage() {
 
   function copyLink() {
     if (creator?.link_slug) {
-      navigator.clipboard?.writeText(`${baseUrl}/pay/${creator.link_slug}`);
+      const botName = process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || 'TON_pass_bot';
+      const tgLink = `https://t.me/${botName}/tps?startapp=pay_${creator.link_slug}`;
+      navigator.clipboard?.writeText(tgLink);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
@@ -179,7 +181,7 @@ export default function DashboardPage() {
             borderRadius: 'var(--radius-sm)', padding: '10px 14px',
           }}>
             <span style={{ fontSize: '11px', color: 'var(--text-muted)', flex: 1, fontFamily: 'JetBrains Mono', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {baseUrl}/pay/{creator.link_slug}
+              t.me/TON_pass_bot/tps?startapp=pay_{creator.link_slug}
             </span>
             <button className="btn btn-primary btn-sm" onClick={copyLink} style={{ flexShrink: 0, minWidth: '80px' }}>
               {copied ? '✓ Copied!' : 'Copy Link'}
