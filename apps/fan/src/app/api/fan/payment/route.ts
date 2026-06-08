@@ -10,7 +10,7 @@ const PLATFORM_WALLET = 'UQAfdeijx6QgEcO97eVfSsTYtC20_-bfLePj7Bl2162XIkjG';
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.twitterId) {
+  if (!session?.user?.telegramId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
