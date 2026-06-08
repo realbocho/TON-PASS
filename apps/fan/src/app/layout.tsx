@@ -49,7 +49,10 @@ function TelegramInit() {
     if (startParam && startParam.startsWith('p-')) {
       const slug = startParam.replace('p-', '');
       if (!window.location.pathname.startsWith('/pay/')) {
-        router.replace(`/pay/${slug}`);
+        // Small delay to ensure router is ready
+        setTimeout(() => {
+          router.replace(`/pay/${slug}`);
+        }, 100);
         return;
       }
     }
