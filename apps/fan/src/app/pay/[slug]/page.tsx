@@ -227,7 +227,7 @@ export default function PayPage() {
               </div>
               <span style={{ fontSize: '12px', color: 'var(--text-muted)', lineHeight: 1.5 }}>
                 I understand the creator will manually send me an invite link after payment.
-                A <strong style={{ color: 'var(--text)' }}>10% platform fee</strong> is included in the total.{' '}
+                A <strong style={{ color: 'var(--text)' }}>5% platform fee</strong> is included in the total.{' '}
                 <strong style={{ color: 'var(--text)' }}>TON-PASS and any associated exchanges are not affiliated with, responsible for, or connected to any trades or financial transactions beyond this platform fee.</strong>
               </span>
             </label>
@@ -384,7 +384,7 @@ function PriceCard({ creator, fees }: { creator: CreatorData; fees: FeesData }) 
         {fees.total.toFixed(2)}
         <span style={{ fontSize: '20px', marginLeft: '6px', color: 'var(--text-muted)' }}>TON</span>
       </div>
-      <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>incl. 10% platform fee</div>
+      <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>incl. 5% platform fee</div>
     </div>
   );
 }
@@ -394,7 +394,7 @@ function FeeBreakdown({ fees, duration }: { fees: FeesData; duration: number }) 
     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
       {[
         { label: 'Subscription', value: `${fees.amount.toFixed(2)} TON` },
-        { label: 'Platform fee (10%)', value: `${fees.fee.toFixed(4)} TON` },
+        { label: 'Platform fee (5%)', value: `${fees.fee.toFixed(4)} TON` },
         { label: 'Duration', value: `${duration} days` },
       ].map(r => (
         <div key={r.label} style={{ display: 'flex', justifyContent: 'space-between' }}>
