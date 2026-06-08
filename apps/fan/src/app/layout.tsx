@@ -23,18 +23,7 @@ function TelegramInit() {
     initialized.current = true;
 
     const tg = (window as any).Telegram?.WebApp;
-    const isTelegramApp = !!tg?.initData;
-
-    if (!isTelegramApp) {
-      const botName = process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || 'TON_pass_bot';
-      const payMatch = window.location.pathname.match(/^\/pay\/(.+)$/);
-      if (payMatch) {
-        window.location.replace(`https://t.me/${botName}/tps?startapp=pay_${payMatch[1]}`);
-      } else {
-        window.location.replace(`https://t.me/${botName}/tps`);
-      }
-      return;
-    }
+    if (!tg?.initData) return;
 
     tg.ready();
     tg.expand();
@@ -48,7 +37,7 @@ function TelegramInit() {
     };
     document.head.appendChild(script);
 
-    // Handle startapp
+    // Handle startapp → route to pay page
     const startParam = tg.initDataUnsafe?.start_param;
     if (startParam?.startsWith('pay_')) {
       const slug = startParam.replace('pay_', '');
