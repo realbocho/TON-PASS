@@ -25,6 +25,10 @@ function TelegramInit() {
     const tg = (window as any).Telegram?.WebApp;
     if (!tg?.initData) return;
 
+    // Read startapp BEFORE tg.ready()
+    const startParam = tg.initDataUnsafe?.start_param || 
+      new URLSearchParams(window.location.search).get('tgWebAppStartParam') || '';
+
     tg.ready();
     tg.expand();
 
@@ -38,15 +42,11 @@ function TelegramInit() {
     document.head.appendChild(script);
 
     // Handle startapp → route to pay page
-    const startParam = tg.initDataUnsafe?.start_param;
-    console.log('TON-PASS startParam:', startParam);
-    console.log('TON-PASS initDataUnsafe:', JSON.stringify(tg.initDataUnsafe));
-    console.log('TON-PASS pathname:', window.location.pathname);
-    
     if (startParam?.startsWith('p-')) {
       const slug = startParam.replace('p-', '');
       if (!window.location.pathname.startsWith('/pay/')) {
         router.replace(`/pay/${slug}`);
+        return;
       }
     }
   }, []);
