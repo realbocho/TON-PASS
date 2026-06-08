@@ -1,0 +1,47 @@
+'use client';
+
+import './globals.css';
+import { SessionProvider } from 'next-auth/react';
+import { TonConnectUIProvider } from '@tonconnect/ui-react';
+import { useEffect } from 'react';
+
+const manifestUrl =
+  process.env.NEXT_PUBLIC_TONCONNECT_MANIFEST_URL ||
+  'https://ton-pass.vercel.app/tonconnect-manifest.json';
+
+function TelegramAnalytics() {
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://tganalytics.xyz/index.js';
+    script.async = true;
+    script.type = 'text/javascript';
+    script.onload = () => {
+      (window as any).telegramAnalytics?.init({
+        token: 'eyJhcHBfbmFtZSI6InRvbl9wYXNzIiwiYXBwX3VybCI6Imh0dHBzOi8vdC5tZS9UT05fcGFzc19ib3QiLCJhcHBfZG9tYWluIjoiaHR0cHM6Ly90b24tcGFzcy52ZXJjZWwuYXBwIn0=!oUOT2W2zad3JOwTtnpyTwEpry0koy/HfORw7CTLtoD4=',
+        appName: 'ton_pass',
+      });
+    };
+    document.head.appendChild(script);
+  }, []);
+  return null;
+}
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <meta name="theme-color" content="#0a0a0f" />
+        <script src="https://telegram.org/js/telegram-web-app.js" async />
+      </head>
+      <body>
+        <SessionProvider>
+          <TonConnectUIProvider manifestUrl={manifestUrl}>
+            <TelegramAnalytics />
+            {children}
+          </TonConnectUIProvider>
+        </SessionProvider>
+      </body>
+    </html>
+  );
+}

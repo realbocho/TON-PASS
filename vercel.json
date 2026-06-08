@@ -1,0 +1,10 @@
+{
+  "buildCommand": "cd apps/fan && npm run build",
+  "outputDirectory": "apps/fan/.next",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "regions": ["sin1"],
+  "env": {
+    "NODE_ENV": "production"
+  }
+}
