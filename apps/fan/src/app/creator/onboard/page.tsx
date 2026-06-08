@@ -154,7 +154,7 @@ export default function OnboardPage() {
                 <span style={{ fontWeight: 700, color: 'var(--ton)', fontFamily: 'JetBrains Mono' }}>{fanPays.toFixed(2)} TON</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Platform fee (10%)</span>
+                <span style={{ color: 'var(--text-muted)' }}>Platform fee (5%)</span>
                 <span style={{ color: 'var(--text-muted)', fontFamily: 'JetBrains Mono' }}>{fee.toFixed(4)} TON</span>
               </div>
             </div>
