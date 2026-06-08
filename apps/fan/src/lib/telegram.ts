@@ -36,8 +36,7 @@ export async function notifyNewPayment(params: {
   const text =
     `💰 <b>New Payment Received!</b>\n\n` +
     `Fan: @${params.fanUsername}\n` +
-    `Amount: ${params.amountTon.toFixed(2)} TON\n\n` +
-    `<a href="${params.dashboardUrl}">👉 Approve in Dashboard</a>`;
+    `Amount: ${params.amountTon.toFixed(2)} TON`;
 
   return sendTelegramMessage(params.chatId, text);
 }
