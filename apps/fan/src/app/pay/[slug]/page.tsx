@@ -48,7 +48,7 @@ export default function PayPage() {
     const tg = (window as any).Telegram?.WebApp;
     if (!tg || !tg.initData) {
       const botName = process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || 'TON_pass_bot';
-      window.location.href = `https://t.me/${botName}/app?startapp=pay_${slug}`;
+      window.location.href = `https://t.me/${botName}/tps?startapp=pay_${slug}`;
       return;
     }
 
