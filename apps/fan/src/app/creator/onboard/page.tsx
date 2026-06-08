@@ -95,37 +95,7 @@ export default function OnboardPage() {
         </p>
       </div>
 
-      {/* How it works flow */}
-      <div style={{ marginBottom: '24px', padding: '18px', borderRadius: 'var(--radius-lg)', background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-        <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '16px', textAlign: 'center' }}>
-          ⚡ How it works
-        </div>
-        {[
-          { step: '1', color: 'var(--accent)', label: 'Set up your page', desc: 'Wallet · price · private Telegram channel' },
-          { step: '2', color: 'var(--green)', label: 'Share your link', desc: 'Paste it anywhere — Telegram, Twitter, Instagram...' },
-          { step: '3', color: 'var(--ton)', label: 'Fan pays with TON', desc: 'They connect wallet and confirm payment' },
-          { step: '4', color: '#a78bfa', label: 'You send the invite link', desc: 'Approve in dashboard → DM the fan your channel invite' },
-        ].map((item, i) => (
-          <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
-              <div style={{
-                width: 28, height: 28, borderRadius: '50%',
-                background: `${item.color}20`, border: `1px solid ${item.color}50`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontWeight: 700, fontSize: '12px', color: item.color,
-              }}>{item.step}</div>
-              {i < 3 && <div style={{ width: 1, height: 20, background: 'var(--border)', margin: '3px 0' }} />}
-            </div>
-            <div style={{ paddingTop: '4px' }}>
-              <div style={{ fontWeight: 700, fontSize: '13px' }}>{item.label}</div>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{item.desc}</div>
-            </div>
-          </div>
-        ))}
-        <div style={{ marginTop: '14px', padding: '10px 12px', borderRadius: 'var(--radius-sm)', background: 'rgba(0,229,153,0.08)', border: '1px solid rgba(0,229,153,0.15)', fontSize: '11px', color: 'var(--text-muted)', textAlign: 'center' }}>
-          🎉 <strong style={{ color: 'var(--text)' }}>Just a link.</strong> No payment gateway. No KYC.
-        </div>
-      </div>
+
 
       {/* Pre-setup guide */}
       <div style={{ marginBottom: '24px', padding: '16px', borderRadius: 'var(--radius-lg)', background: 'linear-gradient(135deg, rgba(0,212,255,0.06), rgba(0,152,234,0.06))', border: '1px solid rgba(0,212,255,0.15)' }}>
@@ -153,26 +123,6 @@ export default function OnboardPage() {
             </div>
           </div>
         ))}
-
-        {/* Tiered access */}
-        <div style={{ marginTop: '14px', padding: '14px', borderRadius: 'var(--radius-sm)', background: 'rgba(255,214,10,0.05)', border: '1px solid rgba(255,214,10,0.2)' }}>
-          <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--yellow)', marginBottom: '10px' }}>
-            🏅 Want to offer tiered access? (Basic → Premium)
-          </div>
-          {[
-            { tier: 'Basic tier', desc: 'Create a private channel → set up TON-PASS link → promote from your public account.' },
-            { tier: 'Premium tier', desc: 'Create another private channel → new TON-PASS account → set basic channel as the public profile → promote the premium link inside your basic channel.' },
-          ].map((t, i) => (
-            <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', marginBottom: '6px' }}>
-              <span style={{ padding: '1px 8px', borderRadius: '10px', fontSize: '10px', fontWeight: 700, background: 'rgba(255,214,10,0.15)', color: 'var(--yellow)', flexShrink: 0, marginTop: '2px' }}>{t.tier}</span>
-              <span style={{ fontSize: '12px', color: 'var(--text-muted)', lineHeight: 1.5 }}>{t.desc}</span>
-            </div>
-          ))}
-          <div style={{ marginTop: '10px', padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: 'rgba(255,214,10,0.08)', fontSize: '11px', color: 'var(--yellow)', lineHeight: 1.6 }}>
-            💡 Each channel becomes the teaser for the next level.
-          </div>
-        </div>
-      </div>
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
