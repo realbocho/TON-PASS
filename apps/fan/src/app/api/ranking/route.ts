@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     rank: i + 1,
     username: c.twitter_username,
     avatar: c.twitter_avatar,
-    twitterUrl: c.public_twitter_url || `https://twitter.com/${c.twitter_username}`,
+    twitterUrl: c.public_profile_url || c.public_twitter_url || `https://t.me/${c.twitter_username}`,
     payUrl: `/pay/${c.link_slug}`,
   }));
 
