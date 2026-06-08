@@ -5,7 +5,6 @@ import { SessionProvider } from 'next-auth/react';
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 import { useEffect, useRef } from 'react';
 import { signIn, useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 
 const manifestUrl =
   process.env.NEXT_PUBLIC_TONCONNECT_MANIFEST_URL ||
@@ -15,7 +14,6 @@ const TGA_TOKEN = 'eyJhcHBfbmFtZSI6InRvbl9wYXNzIiwiYXBwX3VybCI6Imh0dHBzOi8vdC5tZ
 
 function TelegramInit() {
   const { status } = useSession();
-  const router = useRouter();
   const initialized = useRef(false);
 
   useEffect(() => {
@@ -37,22 +35,12 @@ function TelegramInit() {
     };
     document.head.appendChild(script);
 
-    // Handle startapp → route to pay page
-    // Check both initDataUnsafe and URL params
-    const urlParams = new URLSearchParams(window.location.search);
-    const startParam = 
-      tg.initDataUnsafe?.start_param ||
-      urlParams.get('tgWebAppStartParam') ||
-      urlParams.get('startapp') ||
-      '';
-
-    if (startParam && startParam.startsWith('p-')) {
+    // Handle startapp via initDataUnsafe (middleware handles URL params)
+    const startParam = tg.initDataUnsafe?.start_param || '';
+    if (startParam.startsWith('p-')) {
       const slug = startParam.replace('p-', '');
       if (!window.location.pathname.startsWith('/pay/')) {
-        // Small delay to ensure router is ready
-        setTimeout(() => {
-          router.replace(`/pay/${slug}`);
-        }, 100);
+        window.location.replace(`/pay/${slug}`);
         return;
       }
     }
