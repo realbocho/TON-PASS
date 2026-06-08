@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
-import { TonConnect } from '@tonconnect/sdk';
 import { useParams } from 'next/navigation';
 import TelegramLoginButton from '@/components/TelegramLoginButton';
 
@@ -35,23 +34,6 @@ export default function PayPage() {
   const { data: session } = useSession();
   const [tonConnectUI] = useTonConnectUI();
   const walletAddress = useTonAddress();
-
-  // Connect wallet - works in both browser and Telegram Mini App
-  async function connectWallet() {
-    try {
-      // Try normal modal first
-      await tonConnectUI.openModal();
-    } catch {
-      // Fallback: open Tonkeeper via universal link
-      const manifestUrl = process.env.NEXT_PUBLIC_TONCONNECT_MANIFEST_URL || 
-        'https://ton-pass.vercel.app/tonconnect-manifest.json';
-      const returnUrl = encodeURIComponent('https://t.me/TON_pass_bot/tps');
-      window.open(
-        `https://app.tonkeeper.com/ton-connect?ret=${returnUrl}&manifest=${encodeURIComponent(manifestUrl)}`,
-        '_blank'
-      );
-    }
-  }
 
   const [creator, setCreator] = useState<CreatorData | null>(null);
   const [fees, setFees] = useState<FeesData | null>(null);
@@ -337,14 +319,9 @@ export default function PayPage() {
             )}
 
             {!walletAddress ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <button
-                  className="btn btn-ton btn-full btn-lg"
-                  onClick={connectWallet}
-                >
-                  💎 Connect TON Wallet
-                </button>
-              </div>
+              <button className="btn btn-ton btn-full btn-lg" onClick={() => tonConnectUI.openModal()}>
+                🔗 Connect TON Wallet
+              </button>
             ) : (
               <div>
                 <div style={{
