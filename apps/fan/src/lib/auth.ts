@@ -65,8 +65,8 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.telegramId = (user as any).telegramId;
         token.telegramUsername = (user as any).telegramUsername;
-        token.telegramName = user.name;
-        token.telegramAvatar = user.image;
+        token.telegramName = user.name ?? undefined;
+        token.telegramAvatar = user.image ?? undefined;
       }
       return token;
     },
