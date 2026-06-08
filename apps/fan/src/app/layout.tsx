@@ -36,6 +36,16 @@ function TelegramInit() {
     };
     document.head.appendChild(script);
 
+    // Handle startapp parameter - redirect to pay page
+    const startParam = tg?.initDataUnsafe?.start_param;
+    if (startParam?.startsWith('pay_')) {
+      const slug = startParam.replace('pay_', '');
+      if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/pay/')) {
+        window.location.href = `/pay/${slug}`;
+        return;
+      }
+    }
+
     // Auto-login from Mini App
     if (status === 'unauthenticated' && tg?.initDataUnsafe?.user) {
       const user = tg.initDataUnsafe.user;
