@@ -93,30 +93,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             manifestUrl={manifestUrl}
             actionsConfiguration={{
               twaReturnUrl: 'https://t.me/TON_pass_bot/tps',
-              returnStrategy: 'back',
-            }}
-            walletsListConfiguration={{
-              includeWallets: [
-                {
-                  appName: 'telegram-wallet',
-                  name: 'Wallet',
-                  imageUrl: 'https://wallet.tg/images/logo-288.png',
-                  aboutUrl: 'https://wallet.tg/',
-                  universalLink: 'https://t.me/wallet?attach=wallet',
-                  bridgeUrl: 'https://bridge.tonapi.io/bridge',
-                  platforms: ['ios', 'android', 'macos', 'windows', 'linux'],
-                },
-                {
-                  appName: 'tonkeeper',
-                  name: 'Tonkeeper',
-                  imageUrl: 'https://tonkeeper.com/assets/tonconnect-icon.png',
-                  aboutUrl: 'https://tonkeeper.com',
-                  universalLink: 'https://app.tonkeeper.com/ton-connect',
-                  deepLink: 'tonkeeper://ton-connect',
-                  bridgeUrl: 'https://bridge.tonapi.io/bridge',
-                  platforms: ['ios', 'android', 'chrome', 'firefox', 'macos'],
-                },
-              ],
             }}
           >
             <TelegramInit />
