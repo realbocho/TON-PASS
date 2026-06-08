@@ -3,9 +3,9 @@
 import './globals.css';
 import { SessionProvider } from 'next-auth/react';
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { signIn, useSession } from 'next-auth/react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 const manifestUrl =
   process.env.NEXT_PUBLIC_TONCONNECT_MANIFEST_URL ||
@@ -14,19 +14,22 @@ const manifestUrl =
 const TGA_TOKEN = 'eyJhcHBfbmFtZSI6InRvbl9wYXNzIiwiYXBwX3VybCI6Imh0dHBzOi8vdC5tZS9UT05fcGFzc19ib3QiLCJhcHBfZG9tYWluIjoiaHR0cHM6Ly90b24tcGFzcy52ZXJjZWwuYXBwIn0=!oUOT2W2zad3JOwTtnpyTwEpry0koy/HfORw7CTLtoD4=';
 
 function TelegramInit() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
-  const pathname = usePathname();
+  const initialized = useRef(false);
 
   useEffect(() => {
+    // Only run once on mount
+    if (initialized.current) return;
+    initialized.current = true;
+
     const tg = (window as any).Telegram?.WebApp;
     const isTelegramApp = !!tg?.initData;
 
-    // If NOT in Telegram Mini App → redirect to Telegram
+    // Not in Telegram → redirect once
     if (!isTelegramApp) {
       const botName = process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || 'TON_pass_bot';
-      // Extract slug from pay pages
-      const payMatch = pathname?.match(/^\/pay\/(.+)$/);
+      const payMatch = window.location.pathname.match(/^\/pay\/(.+)$/);
       if (payMatch) {
         window.location.replace(`https://t.me/${botName}/tps?startapp=pay_${payMatch[1]}`);
       } else {
@@ -55,28 +58,31 @@ function TelegramInit() {
     const startParam = tg.initDataUnsafe?.start_param;
     if (startParam?.startsWith('pay_')) {
       const slug = startParam.replace('pay_', '');
-      if (!pathname?.startsWith('/pay/')) {
+      if (!window.location.pathname.startsWith('/pay/')) {
         router.replace(`/pay/${slug}`);
-        return;
       }
     }
+  }, []); // Empty deps - run only once on mount
 
-    // Auto-login from Mini App
-    if (status === 'unauthenticated' && tg.initDataUnsafe?.user) {
-      const user = tg.initDataUnsafe.user;
-      signIn('telegram', {
-        id: String(user.id),
-        first_name: user.first_name || '',
-        last_name: user.last_name || '',
-        username: user.username || '',
-        photo_url: user.photo_url || '',
-        auth_date: String(Math.floor(Date.now() / 1000)),
-        hash: '',
-        is_mini_app: 'true',
-        redirect: false,
-      });
-    }
-  }, [status, router, pathname]);
+  // Auto-login - separate effect
+  useEffect(() => {
+    if (status !== 'unauthenticated') return;
+    const tg = (window as any).Telegram?.WebApp;
+    if (!tg?.initDataUnsafe?.user) return;
+
+    const user = tg.initDataUnsafe.user;
+    signIn('telegram', {
+      id: String(user.id),
+      first_name: user.first_name || '',
+      last_name: user.last_name || '',
+      username: user.username || '',
+      photo_url: user.photo_url || '',
+      auth_date: String(Math.floor(Date.now() / 1000)),
+      hash: '',
+      is_mini_app: 'true',
+      redirect: false,
+    });
+  }, [status]);
 
   return null;
 }
