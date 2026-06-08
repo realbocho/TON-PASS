@@ -4,7 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 export async function GET(req: NextRequest) {
   const { data, error } = await supabaseAdmin
     .from('creators')
-    .select('twitter_username, twitter_avatar, public_twitter_url, link_slug')
+    .select('twitter_username, twitter_avatar, public_twitter_url, public_profile_url, link_slug')
     .eq('is_active', true)
     .order('page_views', { ascending: false })
     .limit(50);
