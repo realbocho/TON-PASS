@@ -118,7 +118,14 @@ export default function DashboardPage() {
   }
 
   function openTelegram(username: string) {
-    window.open(`https://t.me/${username.replace('@', '')}`, '_blank');
+    const clean = username.replace('@', '');
+    const url = `https://t.me/${clean}`;
+    const tg = (window as any).Telegram?.WebApp;
+    if (tg?.openTelegramLink) {
+      tg.openTelegramLink(url);
+    } else {
+      window.open(url, '_blank');
+    }
   }
 
   function copyLink() {
