@@ -92,7 +92,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <TonConnectUIProvider
             manifestUrl={manifestUrl}
             actionsConfiguration={{
-              twaReturnUrl: 'https://t.me/TON_pass_bot/tps' as `${string}://${string}`,
+              twaReturnUrl: 'https://t.me/TON_pass_bot/tps',
+              returnStrategy: 'back',
             }}
             walletsListConfiguration={{
               includeWallets: [
