@@ -30,17 +30,33 @@ export async function POST(req: NextRequest) {
   // Check existing active subscription
   const { data: existing } = await supabaseAdmin
     .from('payments')
-    .select('id, status')
+    .select('id, status, expires_at')
     .eq('creator_id', creator.id)
     .eq('fan_twitter_id', session.user.telegramId)
     .in('status', ['pending_approval', 'approved'])
     .single();
 
   if (existing) {
-    return NextResponse.json(
-      { error: 'You already have an active or pending subscription' },
-      { status: 409 },
-    );
+    // Allow renewal if expiring within 3 days
+    if (existing.status === 'approved' && existing.expires_at) {
+      const daysLeft = (new Date(existing.expires_at).getTime() - Date.now()) / 86400000;
+      if (daysLeft > 3) {
+        return NextResponse.json(
+          { error: 'You already have an active subscription. Renewal is available 3 days before expiry.' },
+          { status: 409 },
+        );
+      }
+      // Allow renewal - expire the old one
+      await supabaseAdmin
+        .from('payments')
+        .update({ status: 'expired' })
+        .eq('id', existing.id);
+    } else if (existing.status === 'pending_approval') {
+      return NextResponse.json(
+        { error: 'You already have a pending subscription.' },
+        { status: 409 },
+      );
+    }
   }
 
   const fees = calculateFee(creator.subscription_price_ton);
