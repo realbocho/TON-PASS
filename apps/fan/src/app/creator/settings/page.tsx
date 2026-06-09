@@ -31,6 +31,13 @@ export default function SettingsPage() {
         publicProfileName: data.creator.public_profile_name || '',
         publicTwitterUrl: data.creator.public_twitter_url || '',
         isActive: data.creator.is_active ?? true,
+        freeTrialEnabled: data.creator.free_trial_enabled ?? false,
+        freeTrialDays: data.creator.free_trial_days?.toString() || '3',
+        referralEnabled: data.creator.referral_enabled ?? false,
+        referralBonusDays: data.creator.referral_bonus_days?.toString() || '7',
+        referralFriendDiscount: data.creator.referral_friend_discount_pct?.toString() || '0',
+        reviewsEnabled: data.creator.reviews_enabled ?? true,
+        reviewBonusDays: data.creator.review_bonus_days?.toString() || '1',
       });
     }
     setLoading(false);
@@ -57,6 +64,13 @@ export default function SettingsPage() {
           public_profile_name: form.publicProfileName || null,
           public_twitter_url: form.publicTwitterUrl || null,
           is_active: form.isActive,
+          free_trial_enabled: form.freeTrialEnabled,
+          free_trial_days: parseInt(form.freeTrialDays) || 3,
+          referral_enabled: form.referralEnabled,
+          referral_bonus_days: parseInt(form.referralBonusDays) || 7,
+          referral_friend_discount_pct: parseInt(form.referralFriendDiscount) || 0,
+          reviews_enabled: form.reviewsEnabled,
+          review_bonus_days: parseInt(form.reviewBonusDays) || 1,
         }),
       });
       if (!res.ok) throw new Error();
@@ -97,6 +111,69 @@ export default function SettingsPage() {
             value={form[f.field] || ''} onChange={e => set(f.field, e.target.value)} />
         </div>
       ))}
+
+      {/* Free Trial */}
+      <div style={{ padding: '14px', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <label style={{ display: 'flex', gap: '12px', alignItems: 'center', cursor: 'pointer' }}>
+          <div onClick={() => set('freeTrialEnabled', !form.freeTrialEnabled)} style={{
+            width: 44, height: 24, borderRadius: '12px', position: 'relative',
+            background: form.freeTrialEnabled ? 'var(--green)' : 'var(--border)', transition: 'background 0.2s',
+          }}>
+            <div style={{ position: 'absolute', top: 2, left: form.freeTrialEnabled ? 22 : 2, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.2s' }} />
+          </div>
+          <span style={{ fontSize: '14px', fontWeight: 600 }}>🎁 Free Trial</span>
+        </label>
+        {form.freeTrialEnabled && (
+          <div className="input-wrap">
+            <label className="input-label">Trial Duration (days)</label>
+            <input className="input" type="number" min="1" max="30" value={form.freeTrialDays || '3'} onChange={e => set('freeTrialDays', e.target.value)} />
+          </div>
+        )}
+      </div>
+
+      {/* Referral */}
+      <div style={{ padding: '14px', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <label style={{ display: 'flex', gap: '12px', alignItems: 'center', cursor: 'pointer' }}>
+          <div onClick={() => set('referralEnabled', !form.referralEnabled)} style={{
+            width: 44, height: 24, borderRadius: '12px', position: 'relative',
+            background: form.referralEnabled ? 'var(--green)' : 'var(--border)', transition: 'background 0.2s',
+          }}>
+            <div style={{ position: 'absolute', top: 2, left: form.referralEnabled ? 22 : 2, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.2s' }} />
+          </div>
+          <span style={{ fontSize: '14px', fontWeight: 600 }}>👥 Referral Program</span>
+        </label>
+        {form.referralEnabled && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div className="input-wrap">
+              <label className="input-label">Bonus Days for Referrer</label>
+              <input className="input" type="number" min="1" value={form.referralBonusDays || '7'} onChange={e => set('referralBonusDays', e.target.value)} />
+            </div>
+            <div className="input-wrap">
+              <label className="input-label">Friend Discount (%)</label>
+              <input className="input" type="number" min="0" max="50" value={form.referralFriendDiscount || '0'} onChange={e => set('referralFriendDiscount', e.target.value)} />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Reviews */}
+      <div style={{ padding: '14px', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <label style={{ display: 'flex', gap: '12px', alignItems: 'center', cursor: 'pointer' }}>
+          <div onClick={() => set('reviewsEnabled', !form.reviewsEnabled)} style={{
+            width: 44, height: 24, borderRadius: '12px', position: 'relative',
+            background: form.reviewsEnabled ? 'var(--green)' : 'var(--border)', transition: 'background 0.2s',
+          }}>
+            <div style={{ position: 'absolute', top: 2, left: form.reviewsEnabled ? 22 : 2, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.2s' }} />
+          </div>
+          <span style={{ fontSize: '14px', fontWeight: 600 }}>⭐ Reviews</span>
+        </label>
+        {form.reviewsEnabled && (
+          <div className="input-wrap">
+            <label className="input-label">Review Bonus Days</label>
+            <input className="input" type="number" min="0" max="7" value={form.reviewBonusDays || '1'} onChange={e => set('reviewBonusDays', e.target.value)} />
+          </div>
+        )}
+      </div>
 
       <label style={{ display: 'flex', gap: '12px', alignItems: 'center', cursor: 'pointer' }}>
         <div onClick={() => set('isActive', !form.isActive)} style={{
