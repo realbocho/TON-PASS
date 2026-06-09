@@ -2,25 +2,45 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 
 export async function GET(req: NextRequest) {
-  const { data, error } = await supabaseAdmin
-    .from('creators')
-    .select('twitter_username, twitter_avatar, public_twitter_url, public_profile_url, link_slug')
-    .eq('is_active', true)
-    .order('page_views', { ascending: false })
+  // Get stats with ranking score
+  const { data: stats, error } = await supabaseAdmin
+    .from('creator_stats')
+    .select('id, avg_rating, review_count, rank_score')
+    .order('rank_score', { ascending: false })
     .limit(50);
 
   if (error) {
     return NextResponse.json({ error: 'Failed to fetch ranking' }, { status: 500 });
   }
 
-  // Build public twitter URL: use custom if set, else default to twitter.com/username
-  const ranking = (data || []).map((c, i) => ({
-    rank: i + 1,
-    username: c.twitter_username,
-    avatar: c.twitter_avatar,
-    twitterUrl: c.public_profile_url || c.public_twitter_url || `https://t.me/${c.twitter_username}`,
-    payUrl: `/pay/${c.link_slug}`,
-  }));
+  const ids = (stats || []).map((d: any) => d.id);
+  if (ids.length === 0) return NextResponse.json({ ranking: [] });
+
+  const { data: creators } = await supabaseAdmin
+    .from('creators')
+    .select('id, twitter_username, twitter_avatar, public_profile_url, public_twitter_url, link_slug')
+    .in('id', ids)
+    .eq('is_active', true);
+
+  const creatorMap = Object.fromEntries((creators || []).map((c: any) => [c.id, c]));
+  const statMap = Object.fromEntries((stats || []).map((d: any) => [d.id, d]));
+
+  const ranking = ids
+    .filter((id: string) => creatorMap[id])
+    .map((id: string, i: number) => {
+      const c = creatorMap[id];
+      const s = statMap[id];
+      return {
+        rank: i + 1,
+        username: c.twitter_username,
+        avatar: c.twitter_avatar,
+        twitterUrl: c.public_profile_url || c.public_twitter_url || `https://t.me/${c.twitter_username}`,
+        payUrl: `/pay/${c.link_slug}`,
+        slug: c.link_slug,
+        avgRating: parseFloat(s?.avg_rating || '0'),
+        reviewCount: parseInt(s?.review_count || '0'),
+      };
+    });
 
   return NextResponse.json({ ranking });
 }
