@@ -47,6 +47,7 @@ export default function PayPage() {
   const [referralError, setReferralError] = useState('');
   const [trialInfo, setTrialInfo] = useState<any>(null);
   const [showReview, setShowReview] = useState(false);
+  const [hasReviewed, setHasReviewed] = useState(false);
 
   useEffect(() => {
     const tg = (window as any).Telegram?.WebApp;
@@ -455,7 +456,7 @@ export default function PayPage() {
             channelLink={channelLink}
             channelName={channelName}
             telegramUsername={session?.user?.telegramUsername}
-            onReview={() => setShowReview(true)}
+            onReview={hasReviewed ? undefined : () => setShowReview(true)}
             slug={slug}
           />
         )}
@@ -463,7 +464,10 @@ export default function PayPage() {
         {step === 'success' && showReview && (
           <ReviewScreen
             slug={slug}
-            onDone={() => setShowReview(false)}
+            onDone={(submitted) => {
+              setShowReview(false);
+              if (submitted) setHasReviewed(true);
+            }}
           />
         )}
       </div>
@@ -525,6 +529,7 @@ function SuccessScreen({ channelLink, channelName, telegramUsername, onReview, s
   slug?: string;
 }) {
   const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [reviewDone, setReviewDone] = useState(false);
 
   useEffect(() => {
     if (slug) {
@@ -593,8 +598,8 @@ function SuccessScreen({ channelLink, channelName, telegramUsername, onReview, s
         </div>
       )}
 
-      {/* Review CTA */}
-      {onReview && (
+      {/* Review CTA - 리뷰를 이미 작성했으면 버튼 숨김 */}
+      {onReview && !reviewDone && (
         <button
           className="btn btn-ghost btn-full"
           onClick={onReview}
@@ -602,6 +607,11 @@ function SuccessScreen({ channelLink, channelName, telegramUsername, onReview, s
         >
           ⭐ Leave a Review & Get +1 Day Free
         </button>
+      )}
+      {reviewDone && (
+        <div style={{ textAlign: 'center', fontSize: '13px', color: 'var(--green)' }}>
+          ✓ Review submitted!
+        </div>
       )}
 
       <p style={{ textAlign: 'center', fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.6 }}>
@@ -612,12 +622,13 @@ function SuccessScreen({ channelLink, channelName, telegramUsername, onReview, s
   );
 }
 
-function ReviewScreen({ slug, onDone }: { slug: string; onDone: () => void }) {
+function ReviewScreen({ slug, onDone }: { slug: string; onDone: (submitted?: boolean) => void }) {
   const [rating, setRating] = useState(0);
   const [content, setContent] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [alreadyReviewed, setAlreadyReviewed] = useState(false);
   const [bonusDays, setBonusDays] = useState(0);
 
   async function submit() {
@@ -630,6 +641,12 @@ function ReviewScreen({ slug, onDone }: { slug: string; onDone: () => void }) {
         body: JSON.stringify({ creatorSlug: slug, rating, content, isAnonymous }),
       });
       const data = await res.json();
+      if (res.status === 409) {
+        // 이미 리뷰를 작성한 경우 → 중복 방지
+        setAlreadyReviewed(true);
+        setDone(true);
+        return;
+      }
       if (data.bonusDays) setBonusDays(data.bonusDays);
       setDone(true);
     } catch {
@@ -648,7 +665,7 @@ function ReviewScreen({ slug, onDone }: { slug: string; onDone: () => void }) {
             +{bonusDays} day{bonusDays > 1 ? 's' : ''} added to your subscription 🎁
           </div>
         )}
-        <button className="btn btn-ghost btn-full" onClick={onDone}>← Back</button>
+        <button className="btn btn-ghost btn-full" onClick={() => onDone(!alreadyReviewed)}>← Back</button>
       </div>
     );
   }
@@ -703,7 +720,7 @@ function ReviewScreen({ slug, onDone }: { slug: string; onDone: () => void }) {
         {submitting ? <><span className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }} /> Submitting…</> : 'Submit Review'}
       </button>
 
-      <button className="btn btn-ghost btn-full" onClick={onDone}>← Skip</button>
+      <button className="btn btn-ghost btn-full" onClick={() => onDone(false)}>← Skip</button>
     </div>
   );
 }
