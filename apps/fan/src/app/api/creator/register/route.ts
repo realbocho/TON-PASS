@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     .from('creators')
     .upsert(
       {
-        twitter_id: session.user.telegramId,
+        telegram_id: session.user.telegramId,
         twitter_username: session.user.telegramUsername || session.user.telegramName,
         twitter_avatar: session.user.telegramAvatar,
         payment_address: paymentAddress,
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
         reviews_enabled: reviewsEnabled ?? true,
         review_bonus_days: reviewBonusDays || 1,
       },
-      { onConflict: 'twitter_id', ignoreDuplicates: false },
+      { onConflict: 'telegram_id', ignoreDuplicates: false },
     )
     .select()
     .single();
@@ -83,7 +83,7 @@ export async function GET(req: NextRequest) {
   const { data: creator } = await supabaseAdmin
     .from('creators')
     .select('*')
-    .eq('twitter_id', session.user.telegramId)
+    .eq('telegram_id', session.user.telegramId)
     .single();
 
   return NextResponse.json({ creator: creator || null });
