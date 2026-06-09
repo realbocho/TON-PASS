@@ -37,7 +37,7 @@ export async function PATCH(req: NextRequest) {
   const { data, error } = await supabaseAdmin
     .from('creators')
     .update(filtered)
-    .eq('twitter_id', session.user.telegramId)
+    .eq('telegram_id', session.user.telegramId)
     .select()
     .single();
 
