@@ -7,7 +7,7 @@ interface RankingItem {
   rank: number;
   username: string;
   avatar?: string;
-  twitterUrl: string;
+  twitterUrl: string | null;
   payUrl: string;
   slug: string;
   avgRating: number;
@@ -38,7 +38,8 @@ export default function RankingPage() {
     }
   }
 
-  function openExternalLink(url: string) {
+  function openExternalLink(url: string | null) {
+    if (!url) return;
     const tg = (window as any).Telegram?.WebApp;
     if (tg?.openLink) {
       tg.openLink(url);
@@ -149,11 +150,12 @@ export default function RankingPage() {
             <div style={{ flex: 1, minWidth: 0 }}>
               <button
                 onClick={() => openExternalLink(item.twitterUrl)}
-                style={{ display: 'block', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left', width: '100%' }}
+                style={{ display: 'block', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left', width: '100%', color: 'inherit' }}
               >
                 <div style={{
                   fontWeight: 700, fontSize: '15px',
                   overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                  color: 'var(--text)',
                 }}>
                   @{item.username}
                 </div>
