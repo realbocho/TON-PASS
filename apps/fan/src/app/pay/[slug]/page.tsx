@@ -42,6 +42,11 @@ export default function PayPage() {
   const [channelName, setChannelName] = useState<string | null>(null);
   const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState('');
+  const [referralCode, setReferralCode] = useState('');
+  const [referralInfo, setReferralInfo] = useState<any>(null);
+  const [referralError, setReferralError] = useState('');
+  const [trialInfo, setTrialInfo] = useState<any>(null);
+  const [showReview, setShowReview] = useState(false);
 
   useEffect(() => {
     const tg = (window as any).Telegram?.WebApp;
@@ -64,10 +69,48 @@ export default function PayPage() {
       const data = await res.json();
       setCreator(data.creator);
       setFees(data.fees);
+      setTrialInfo(data.trialInfo);
       setStep('info');
     } catch {
       setStep('error');
       setError('Creator not found or link is invalid.');
+    }
+  }
+
+  async function applyReferral() {
+    setReferralError('');
+    if (!referralCode.trim()) return;
+    const res = await fetch('/api/fan/referral', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: referralCode.trim(), creatorSlug: slug }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setReferralError(data.error || 'Invalid code');
+      setReferralInfo(null);
+    } else {
+      setReferralInfo(data);
+      setReferralError('');
+    }
+  }
+
+  async function handleFreeTrial() {
+    if (!session) { setStep('connect-telegram'); return; }
+    try {
+      const res = await fetch('/api/fan/free-trial', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ creatorSlug: slug }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setChannelLink(data.telegramChannelLink);
+      setChannelName(data.telegramChannelName);
+      setStep('success');
+    } catch (err: any) {
+      setError(err.message || 'Failed to start trial');
+      setStep('error');
     }
   }
 
@@ -230,8 +273,20 @@ export default function PayPage() {
               </span>
             </label>
 
+            {/* Free trial button */}
+            {trialInfo?.enabled && (
+              <button
+                className="btn btn-ghost btn-full"
+                style={{ marginTop: '12px', borderColor: 'rgba(0,229,153,0.3)', color: 'var(--green)' }}
+                disabled={!agreed}
+                onClick={handleFreeTrial}
+              >
+                🎁 Start {trialInfo.days}-Day Free Trial
+              </button>
+            )}
+
             <button className="btn btn-primary btn-full btn-lg"
-              style={{ marginTop: '20px' }} disabled={!agreed} onClick={handleProceed}>
+              style={{ marginTop: '12px' }} disabled={!agreed} onClick={handleProceed}>
               Continue →
             </button>
 
@@ -318,8 +373,39 @@ export default function PayPage() {
               </div>
             )}
 
+            {/* Referral code */}
+            <div style={{ marginBottom: '12px' }}>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <input
+                  className="input"
+                  placeholder="Referral code (optional)"
+                  value={referralCode}
+                  onChange={e => setReferralCode(e.target.value.toUpperCase())}
+                  style={{ flex: 1 }}
+                />
+                <button className="btn btn-ghost btn-sm" onClick={applyReferral} style={{ flexShrink: 0 }}>
+                  Apply
+                </button>
+              </div>
+              {referralError && <div style={{ fontSize: '11px', color: 'var(--red)', marginTop: '4px' }}>{referralError}</div>}
+              {referralInfo && (
+                <div style={{ fontSize: '11px', color: 'var(--green)', marginTop: '4px' }}>
+                  ✓ {referralInfo.discountPct}% discount applied!
+                </div>
+              )}
+            </div>
+
             {!walletAddress ? (
-              <button className="btn btn-ton btn-full btn-lg" onClick={() => tonConnectUI.openModal()}>
+              <button 
+                className="btn btn-ton btn-full btn-lg" 
+                onClick={async () => {
+                  try {
+                    await tonConnectUI.openModal();
+                  } catch(e) {
+                    console.error('openModal error:', e);
+                  }
+                }}
+              >
                 🔗 Connect TON Wallet
               </button>
             ) : (
@@ -353,11 +439,20 @@ export default function PayPage() {
         )}
 
         {/* SUCCESS */}
-        {step === 'success' && (
+        {step === 'success' && !showReview && (
           <SuccessScreen
             channelLink={channelLink}
             channelName={channelName}
             telegramUsername={session?.user?.telegramUsername}
+            onReview={() => setShowReview(true)}
+            slug={slug}
+          />
+        )}
+
+        {step === 'success' && showReview && (
+          <ReviewScreen
+            slug={slug}
+            onDone={() => setShowReview(false)}
           />
         )}
       </div>
@@ -411,13 +506,28 @@ function FeeBreakdown({ fees, duration }: { fees: FeesData; duration: number }) 
   );
 }
 
-function SuccessScreen({ channelLink, channelName, telegramUsername }: {
+function SuccessScreen({ channelLink, channelName, telegramUsername, onReview, slug }: {
   channelLink?: string | null;
   channelName?: string | null;
   telegramUsername?: string;
+  onReview?: () => void;
+  slug?: string;
 }) {
-  function copyUsername() {
-    if (telegramUsername) navigator.clipboard?.writeText(`@${telegramUsername}`);
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (slug) {
+      fetch(`/api/fan/referral?slug=${slug}`)
+        .then(r => r.json())
+        .then(d => { if (d.code) setReferralCode(d.code); })
+        .catch(() => {});
+    }
+  }, [slug]);
+
+  function copyReferral() {
+    if (referralCode) {
+      navigator.clipboard?.writeText(referralCode);
+    }
   }
 
   return (
@@ -446,9 +556,40 @@ function SuccessScreen({ channelLink, channelName, telegramUsername }: {
         ))}
       </div>
 
-      {telegramUsername && (
-        <button className="btn btn-ghost btn-full" onClick={copyUsername}>
-          📋 Copy My Telegram ID (@{telegramUsername})
+      {/* Referral code */}
+      {referralCode && (
+        <div style={{
+          padding: '14px', borderRadius: 'var(--radius-sm)',
+          background: 'rgba(0,229,153,0.08)', border: '1px solid rgba(0,229,153,0.2)',
+        }}>
+          <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--green)', marginBottom: '8px' }}>
+            🎁 Share & Earn
+          </div>
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '10px' }}>
+            Share your referral code with friends. Get bonus days when they subscribe!
+          </div>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <div style={{
+              flex: 1, padding: '8px 12px', borderRadius: 'var(--radius-sm)',
+              background: 'var(--bg)', border: '1px solid var(--border)',
+              fontFamily: 'JetBrains Mono', fontSize: '16px', fontWeight: 700,
+              color: 'var(--green)', textAlign: 'center', letterSpacing: '0.1em',
+            }}>
+              {referralCode}
+            </div>
+            <button className="btn btn-green btn-sm" onClick={copyReferral}>Copy</button>
+          </div>
+        </div>
+      )}
+
+      {/* Review CTA */}
+      {onReview && (
+        <button
+          className="btn btn-ghost btn-full"
+          onClick={onReview}
+          style={{ borderColor: 'rgba(255,214,10,0.3)', color: 'var(--yellow)' }}
+        >
+          ⭐ Leave a Review & Get +1 Day Free
         </button>
       )}
 
@@ -456,6 +597,102 @@ function SuccessScreen({ channelLink, channelName, telegramUsername }: {
         Keep an eye on your Telegram messages.<br />
         The creator will send the invite link within 24 hours.
       </p>
+    </div>
+  );
+}
+
+function ReviewScreen({ slug, onDone }: { slug: string; onDone: () => void }) {
+  const [rating, setRating] = useState(0);
+  const [content, setContent] = useState('');
+  const [isAnonymous, setIsAnonymous] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [done, setDone] = useState(false);
+  const [bonusDays, setBonusDays] = useState(0);
+
+  async function submit() {
+    if (!rating) return;
+    setSubmitting(true);
+    try {
+      const res = await fetch('/api/fan/review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ creatorSlug: slug, rating, content, isAnonymous }),
+      });
+      const data = await res.json();
+      if (data.bonusDays) setBonusDays(data.bonusDays);
+      setDone(true);
+    } catch {
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (done) {
+    return (
+      <div className="fade-up" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '16px', textAlign: 'center' }}>
+        <div style={{ fontSize: '56px' }}>⭐</div>
+        <h2 style={{ fontSize: '20px', fontWeight: 700 }}>Thanks for your review!</h2>
+        {bonusDays > 0 && (
+          <div style={{ padding: '10px 16px', borderRadius: 'var(--radius-sm)', background: 'var(--green-dim)', color: 'var(--green)', fontSize: '13px' }}>
+            +{bonusDays} day{bonusDays > 1 ? 's' : ''} added to your subscription 🎁
+          </div>
+        )}
+        <button className="btn btn-ghost btn-full" onClick={onDone}>← Back</button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="fade-up" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <h2 style={{ fontSize: '18px', fontWeight: 700 }}>Leave a Review</h2>
+      <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+        Get +1 day added to your subscription for leaving a review!
+      </p>
+
+      {/* Star rating */}
+      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', padding: '8px 0' }}>
+        {[1,2,3,4,5].map(s => (
+          <button
+            key={s}
+            onClick={() => setRating(s)}
+            style={{
+              fontSize: '32px', background: 'none', border: 'none', cursor: 'pointer',
+              opacity: s <= rating ? 1 : 0.3, transition: 'opacity 0.15s',
+            }}
+          >⭐</button>
+        ))}
+      </div>
+
+      <div className="input-wrap">
+        <label className="input-label">Comment (optional)</label>
+        <textarea
+          className="input"
+          placeholder="Share your experience..."
+          value={content}
+          onChange={e => setContent(e.target.value)}
+          rows={3}
+          style={{ resize: 'none' }}
+        />
+      </div>
+
+      <label style={{ display: 'flex', gap: '10px', alignItems: 'center', cursor: 'pointer' }}>
+        <input
+          type="checkbox"
+          checked={isAnonymous}
+          onChange={e => setIsAnonymous(e.target.checked)}
+        />
+        <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Post anonymously</span>
+      </label>
+
+      <button
+        className="btn btn-primary btn-full"
+        onClick={submit}
+        disabled={!rating || submitting}
+      >
+        {submitting ? <><span className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }} /> Submitting…</> : 'Submit Review'}
+      </button>
+
+      <button className="btn btn-ghost btn-full" onClick={onDone}>← Skip</button>
     </div>
   );
 }
