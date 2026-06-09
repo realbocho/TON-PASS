@@ -117,15 +117,33 @@ export default function DashboardPage() {
     }
   }
 
-  function openTelegram(username: string) {
-    const clean = username.replace('@', '');
-    const url = `https://t.me/${clean}`;
+  function openTelegram(telegramId?: string | null, username?: string | null) {
     const tg = (window as any).Telegram?.WebApp;
-    if (tg?.openTelegramLink) {
-      tg.openTelegramLink(url);
-    } else {
-      window.open(url, '_blank');
+
+    // fan_telegram_id가 있으면 DM으로 직접 이동 (가장 정확)
+    if (telegramId) {
+      const url = `tg://user?id=${telegramId}`;
+      if (tg?.openTelegramLink) {
+        tg.openTelegramLink(url);
+      } else {
+        window.open(url, '_blank');
+      }
+      return;
     }
+
+    // telegram_id 없으면 username으로 fallback
+    if (username) {
+      const clean = username.replace('@', '');
+      const url = `https://t.me/${clean}`;
+      if (tg?.openTelegramLink) {
+        tg.openTelegramLink(url);
+      } else {
+        window.open(url, '_blank');
+      }
+      return;
+    }
+
+    alert('Telegram 정보가 없습니다.');
   }
 
   function copyLink() {
@@ -255,20 +273,20 @@ export default function DashboardPage() {
           <PendingCard key={p.id} payment={p}
             onApprove={() => handleApprove(p.id)}
             onReject={() => handleReject(p.id)}
-            onOpenTelegram={() => openTelegram(p.fan_telegram_username || p.fan_twitter_username)}
+            onOpenTelegram={() => openTelegram(p.fan_telegram_id, p.fan_telegram_username)}
             loading={actionLoading === p.id}
           />
         ))}
 
         {tab === 'active' && active.map(p => (
           <ActiveCard key={p.id} payment={p}
-            onOpenTelegram={() => openTelegram(p.fan_telegram_username || p.fan_twitter_username)}
+            onOpenTelegram={() => openTelegram(p.fan_telegram_id, p.fan_telegram_username)}
           />
         ))}
 
         {tab === 'expiring' && expiring.map(p => (
           <ExpiringCard key={p.id} payment={p}
-            onOpenTelegram={() => openTelegram(p.fan_telegram_username || p.fan_twitter_username)}
+            onOpenTelegram={() => openTelegram(p.fan_telegram_id, p.fan_telegram_username)}
             onExpire={() => handleExpire(p.id)}
             loading={actionLoading === p.id}
           />
