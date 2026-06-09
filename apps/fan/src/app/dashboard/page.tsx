@@ -311,7 +311,7 @@ function PendingCard({ payment, onApprove, onReject, onOpenTelegram, loading }: 
         background: 'rgba(255,214,10,0.05)', border: '1px solid rgba(255,214,10,0.15)',
         fontSize: '11px', color: 'var(--text-muted)', marginBottom: '12px', lineHeight: 1.5,
       }}>
-        💬 Before approving, send the fan your private channel invite link via Telegram DM(Click button -> Message on Telegram).
+        💬 Before approving, send the fan your private channel invite link via Telegram DM.
       </div>
 
       <div style={{ display: 'flex', gap: '8px' }}>
