@@ -28,12 +28,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Creator not found' }, { status: 404 });
   }
 
-  // Check if fan already has an active/pending subscription
+  // fan_telegram_id 기준 중복 체크 (fan_twitter_id도 fallback)
   const { data: existing } = await supabaseAdmin
     .from('payments')
     .select('id, status')
     .eq('creator_id', creator.id)
-    .eq('fan_twitter_id', session.user.telegramId)
+    .eq('fan_telegram_id', session.user.telegramId)
     .in('status', ['pending_payment', 'pending_approval', 'approved'])
     .single();
 
@@ -51,8 +51,10 @@ export async function POST(req: NextRequest) {
     .from('payments')
     .insert({
       creator_id: creator.id,
+      fan_telegram_id: session.user.telegramId,
+      fan_telegram_username: session.user.telegramUsername,
       fan_twitter_id: session.user.telegramId,
-      fan_twitter_username: session.user.telegramUsername,
+      fan_twitter_username: session.user.telegramUsername || session.user.telegramName,
       fan_twitter_avatar: session.user.telegramAvatar,
       amount_ton: fees.amount,
       fee_ton: fees.fee,
@@ -73,7 +75,6 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     payment,
     tonPayment: {
-      // Two separate messages: creator gets subscription amount, platform gets 5% fee
       messages: [
         {
           address: creator.payment_address,
