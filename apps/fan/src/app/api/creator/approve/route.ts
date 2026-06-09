@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
 
   const { data: payment } = await supabaseAdmin
     .from('payments')
-    .select('id, status')
+    .select('id, status, review_bonus_days_pending')
     .eq('id', paymentId)
     .eq('creator_id', creator.id)
     .eq('status', 'pending_approval')
@@ -35,7 +35,10 @@ export async function POST(req: NextRequest) {
   }
 
   const now = new Date();
-  const expiresAt = new Date(now.getTime() + creator.subscription_duration_days * 86400 * 1000);
+  // review_bonus_days_pending: 리뷰를 pending_approval 상태에서 먼저 작성한 경우 보너스 일수 반영
+  const reviewBonus = (payment as any).review_bonus_days_pending ?? 0;
+  const totalDays = creator.subscription_duration_days + reviewBonus;
+  const expiresAt = new Date(now.getTime() + totalDays * 86400 * 1000);
 
   const { error } = await supabaseAdmin
     .from('payments')
@@ -44,6 +47,7 @@ export async function POST(req: NextRequest) {
       approved_at: now.toISOString(),
       subscribed_at: now.toISOString(),
       expires_at: expiresAt.toISOString(),
+      review_bonus_days_pending: 0,  // 적용 후 초기화
     })
     .eq('id', paymentId);
 
