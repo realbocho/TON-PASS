@@ -9,6 +9,9 @@ interface RankingItem {
   avatar?: string;
   twitterUrl: string;
   payUrl: string;
+  slug: string;
+  avgRating: number;
+  reviewCount: number;
 }
 
 export default function RankingPage() {
@@ -150,8 +153,18 @@ export default function RankingPage() {
                   @{item.username}
                 </div>
               </a>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                Private Channel Creator
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '3px' }}>
+                {item.avgRating > 0 && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                    <span style={{ fontSize: '11px', color: 'var(--yellow)' }}>{'⭐'.repeat(Math.round(item.avgRating))}</span>
+                    <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                      {item.avgRating.toFixed(1)} ({item.reviewCount})
+                    </span>
+                  </div>
+                )}
+                {item.avgRating === 0 && (
+                  <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>No reviews yet</div>
+                )}
               </div>
             </div>
 
