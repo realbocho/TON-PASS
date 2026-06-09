@@ -38,6 +38,15 @@ export default function RankingPage() {
     }
   }
 
+  function openExternalLink(url: string) {
+    const tg = (window as any).Telegram?.WebApp;
+    if (tg?.openLink) {
+      tg.openLink(url);
+    } else {
+      window.open(url, '_blank');
+    }
+  }
+
   const medals: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' };
 
   return (
@@ -111,11 +120,9 @@ export default function RankingPage() {
             </div>
 
             {/* Avatar */}
-            <a
-              href={item.twitterUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ flexShrink: 0 }}
+            <button
+              onClick={() => openExternalLink(item.twitterUrl)}
+              style={{ flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
             >
               {item.avatar ? (
                 <img
@@ -136,15 +143,13 @@ export default function RankingPage() {
                   👤
                 </div>
               )}
-            </a>
+            </button>
 
             {/* Info */}
             <div style={{ flex: 1, minWidth: 0 }}>
-              <a
-                href={item.twitterUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ display: 'block' }}
+              <button
+                onClick={() => openExternalLink(item.twitterUrl)}
+                style={{ display: 'block', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left', width: '100%' }}
               >
                 <div style={{
                   fontWeight: 700, fontSize: '15px',
@@ -152,7 +157,7 @@ export default function RankingPage() {
                 }}>
                   @{item.username}
                 </div>
-              </a>
+              </button>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '3px' }}>
                 {item.avgRating > 0 && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
