@@ -120,9 +120,11 @@ export default function DashboardPage() {
   function openTelegram(telegramId?: string | null, username?: string | null) {
     const tg = (window as any).Telegram?.WebApp;
 
-    // fan_telegram_id가 있으면 DM으로 직접 이동 (가장 정확)
-    if (telegramId) {
-      const url = `tg://user?id=${telegramId}`;
+    // Mini App 안에서는 tg:// 딥링크가 동작하지 않음
+    // username이 있으면 https://t.me/username 으로 DM 열기
+    if (username) {
+      const clean = username.replace('@', '');
+      const url = `https://t.me/${clean}`;
       if (tg?.openTelegramLink) {
         tg.openTelegramLink(url);
       } else {
@@ -131,14 +133,14 @@ export default function DashboardPage() {
       return;
     }
 
-    // telegram_id 없으면 username으로 fallback
-    if (username) {
-      const clean = username.replace('@', '');
-      const url = `https://t.me/${clean}`;
+    // username 없고 id만 있는 경우 — Mini App 밖(브라우저)에서만 tg:// 동작
+    if (telegramId) {
+      const tgUrl = `tg://user?id=${telegramId}`;
+      const webUrl = `https://t.me/user?id=${telegramId}`;
       if (tg?.openTelegramLink) {
-        tg.openTelegramLink(url);
+        tg.openTelegramLink(webUrl);
       } else {
-        window.open(url, '_blank');
+        window.open(tgUrl, '_blank');
       }
       return;
     }
