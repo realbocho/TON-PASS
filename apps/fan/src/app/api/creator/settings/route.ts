@@ -21,6 +21,13 @@ export async function PATCH(req: NextRequest) {
     'public_profile_name',
     'public_twitter_url',
     'is_active',
+    'free_trial_enabled',
+    'free_trial_days',
+    'referral_enabled',
+    'referral_bonus_days',
+    'referral_friend_discount_pct',
+    'reviews_enabled',
+    'review_bonus_days',
   ];
 
   const filtered = Object.fromEntries(
