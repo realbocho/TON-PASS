@@ -60,13 +60,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Reviews disabled' }, { status: 403 });
   }
 
-  // Must have approved subscription
+  // Must have approved or pending_approval subscription (결제 완료 상태면 리뷰 가능)
   const { data: payment } = await supabaseAdmin
     .from('payments')
     .select('id, expires_at')
     .eq('creator_id', creator.id)
     .eq('fan_telegram_id', session.user.telegramId)
-    .eq('status', 'approved')
+    .in('status', ['approved', 'pending_approval'])
+    .order('created_at', { ascending: false })
+    .limit(1)
     .single();
 
   if (!payment) {
