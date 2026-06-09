@@ -25,13 +25,16 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ enabled: false });
   }
 
-  // Get fan's active payment
+  // Get fan's active or pending payment
+  // pending_approval도 포함: 결제 직후 success 화면에서 referral code를 즉시 발급받을 수 있도록
   const { data: payment } = await supabaseAdmin
     .from('payments')
     .select('id')
     .eq('creator_id', creator.id)
     .eq('fan_telegram_id', session.user.telegramId)
-    .eq('status', 'approved')
+    .in('status', ['pending_approval', 'approved'])
+    .order('created_at', { ascending: false })
+    .limit(1)
     .single();
 
   if (!payment) {
