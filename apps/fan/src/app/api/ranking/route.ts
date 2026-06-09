@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
         rank: i + 1,
         username: c.twitter_username,
         avatar: c.twitter_avatar,
-        twitterUrl: c.public_profile_url || c.public_twitter_url || `https://t.me/${c.twitter_username}`,
+        twitterUrl: c.public_profile_url || c.public_twitter_url || null,
         payUrl: `/pay/${c.link_slug}`,
         slug: c.link_slug,
         avgRating: parseFloat(s?.avg_rating || '0'),
