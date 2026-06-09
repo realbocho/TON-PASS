@@ -17,6 +17,13 @@ export default function OnboardPage() {
     telegramChannelName: '',
     publicProfileUrl: '',
     publicProfileName: '',
+    freeTrialEnabled: false,
+    freeTrialDays: '3',
+    referralEnabled: false,
+    referralBonusDays: '7',
+    referralFriendDiscount: '0',
+    reviewsEnabled: true,
+    reviewBonusDays: '1',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -45,6 +52,13 @@ export default function OnboardPage() {
           publicProfileUrl: form.publicProfileUrl || null,
           publicProfileName: form.publicProfileName || null,
           notificationChatId: session?.user?.telegramId,
+          freeTrialEnabled: form.freeTrialEnabled,
+          freeTrialDays: parseInt(form.freeTrialDays) || 3,
+          referralEnabled: form.referralEnabled,
+          referralBonusDays: parseInt(form.referralBonusDays) || 7,
+          referralFriendDiscount: parseInt(form.referralFriendDiscount) || 0,
+          reviewsEnabled: form.reviewsEnabled,
+          reviewBonusDays: parseInt(form.reviewBonusDays) || 1,
         }),
       });
       const data = await res.json();
@@ -75,7 +89,7 @@ export default function OnboardPage() {
   }
 
   const price = parseFloat(form.subscriptionPriceTon) || 0;
-  const fee = price * 0.05;
+  const fee = price * 0.10;
   const fanPays = price + fee;
 
   return (
@@ -200,6 +214,89 @@ export default function OnboardPage() {
               <input className="input" placeholder="https://t.me/mypublicchannel" value={form.publicProfileUrl} onChange={e => set('publicProfileUrl', e.target.value)} />
               <span style={{ fontSize: '11px', color: 'var(--text-dim)' }}>Your public Telegram channel, Twitter, or any public page</span>
             </div>
+          </div>
+        </section>
+
+        {/* Free Trial */}
+        <section>
+          <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>05 — Free Trial</div>
+          <div style={{ padding: '14px', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <label style={{ display: 'flex', gap: '12px', alignItems: 'center', cursor: 'pointer' }}>
+              <div onClick={() => set('freeTrialEnabled', !form.freeTrialEnabled)} style={{
+                width: 44, height: 24, borderRadius: '12px', position: 'relative',
+                background: form.freeTrialEnabled ? 'var(--green)' : 'var(--border)', transition: 'background 0.2s',
+              }}>
+                <div style={{ position: 'absolute', top: 2, left: form.freeTrialEnabled ? 22 : 2, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.2s' }} />
+              </div>
+              <div>
+                <div style={{ fontSize: '14px', fontWeight: 600 }}>🎁 Free Trial</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Let fans try before they pay</div>
+              </div>
+            </label>
+            {form.freeTrialEnabled && (
+              <div className="input-wrap">
+                <label className="input-label">Trial Duration (days)</label>
+                <select className="input" value={form.freeTrialDays} onChange={e => set('freeTrialDays', e.target.value)}>
+                  {[1,3,5,7].map(d => <option key={d} value={d}>{d} days</option>)}
+                </select>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Referral */}
+        <section>
+          <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>06 — Referral Program</div>
+          <div style={{ padding: '14px', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <label style={{ display: 'flex', gap: '12px', alignItems: 'center', cursor: 'pointer' }}>
+              <div onClick={() => set('referralEnabled', !form.referralEnabled)} style={{
+                width: 44, height: 24, borderRadius: '12px', position: 'relative',
+                background: form.referralEnabled ? 'var(--green)' : 'var(--border)', transition: 'background 0.2s',
+              }}>
+                <div style={{ position: 'absolute', top: 2, left: form.referralEnabled ? 22 : 2, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.2s' }} />
+              </div>
+              <div>
+                <div style={{ fontSize: '14px', fontWeight: 600 }}>👥 Referral Program</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Reward fans who invite friends</div>
+              </div>
+            </label>
+            {form.referralEnabled && (
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <div className="input-wrap" style={{ flex: 1 }}>
+                  <label className="input-label">Bonus Days (referrer)</label>
+                  <input className="input" type="number" min="1" value={form.referralBonusDays} onChange={e => set('referralBonusDays', e.target.value)} />
+                </div>
+                <div className="input-wrap" style={{ flex: 1 }}>
+                  <label className="input-label">Friend Discount (%)</label>
+                  <input className="input" type="number" min="0" max="50" value={form.referralFriendDiscount} onChange={e => set('referralFriendDiscount', e.target.value)} />
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Reviews */}
+        <section>
+          <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>07 — Reviews</div>
+          <div style={{ padding: '14px', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <label style={{ display: 'flex', gap: '12px', alignItems: 'center', cursor: 'pointer' }}>
+              <div onClick={() => set('reviewsEnabled', !form.reviewsEnabled)} style={{
+                width: 44, height: 24, borderRadius: '12px', position: 'relative',
+                background: form.reviewsEnabled ? 'var(--green)' : 'var(--border)', transition: 'background 0.2s',
+              }}>
+                <div style={{ position: 'absolute', top: 2, left: form.reviewsEnabled ? 22 : 2, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.2s' }} />
+              </div>
+              <div>
+                <div style={{ fontSize: '14px', fontWeight: 600 }}>⭐ Reviews</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Let fans review your channel</div>
+              </div>
+            </label>
+            {form.reviewsEnabled && (
+              <div className="input-wrap">
+                <label className="input-label">Review Bonus Days</label>
+                <input className="input" type="number" min="0" max="7" value={form.reviewBonusDays} onChange={e => set('reviewBonusDays', e.target.value)} />
+              </div>
+            )}
           </div>
         </section>
 
