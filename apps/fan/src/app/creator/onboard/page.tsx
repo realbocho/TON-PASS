@@ -28,7 +28,7 @@ export default function OnboardPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  function set(field: string, value: string) {
+  function set(field: string, value: string | boolean) {
     setForm(f => ({ ...f, [field]: value }));
   }
 
