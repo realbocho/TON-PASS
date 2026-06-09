@@ -64,7 +64,8 @@ export default function PayPage() {
 
   async function fetchCreator() {
     try {
-      const res = await fetch(`/api/fan/creator/${slug}`);
+      // no-store: 크리에이터가 설정을 바꾸면 즉시 반영되어야 함
+      const res = await fetch(`/api/fan/creator/${slug}`, { cache: 'no-store' });
       if (!res.ok) throw new Error('Creator not found');
       const data = await res.json();
       setCreator(data.creator);
@@ -146,6 +147,16 @@ export default function PayPage() {
       }
 
       const { tonPayment, tempId } = await res.json();
+
+      // prepare API에서 받은 실제 최신 금액으로 UI 동기화
+      // 크리에이터가 설정을 변경했을 경우 팬에게 정확한 금액이 표시됨
+      if (tonPayment.amountTon !== undefined) {
+        setFees({
+          amount: tonPayment.amountTon,
+          fee: tonPayment.feeTon,
+          total: tonPayment.totalTon,
+        });
+      }
 
       const tx = {
         validUntil: Math.floor(Date.now() / 1000) + 600,
