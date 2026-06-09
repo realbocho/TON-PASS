@@ -89,7 +89,7 @@ export default function OnboardPage() {
   }
 
   const price = parseFloat(form.subscriptionPriceTon) || 0;
-  const fee = price * 0.10;
+  const fee = price * 0.05;
   const fanPays = price + fee;
 
   return (
