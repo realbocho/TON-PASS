@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 
+// 실시간 데이터 응답을 위해 캐싱 완전 비활성화
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   // Get stats with ranking score
   const { data: stats, error } = await supabaseAdmin
@@ -42,5 +45,10 @@ export async function GET(req: NextRequest) {
       };
     });
 
-  return NextResponse.json({ ranking });
+  const response = NextResponse.json({ ranking });
+  // 브라우저 및 CDN 캐싱 완전 비활성화
+  response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  response.headers.set('Pragma', 'no-cache');
+  response.headers.set('Expires', '0');
+  return response;
 }
