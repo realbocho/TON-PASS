@@ -104,21 +104,34 @@ export async function POST(req: NextRequest) {
   }
 
   // Apply bonus days
+  // review_bonus_days가 null/undefined인 경우도 안전하게 처리
+  const bonusDays: number = creator.review_bonus_days ?? 0;
   let bonusApplied = false;
-  if (creator.review_bonus_days > 0 && payment.expires_at) {
-    const newExpiry = new Date(
-      new Date(payment.expires_at).getTime() + creator.review_bonus_days * 86400 * 1000
-    );
-    await supabaseAdmin
-      .from('payments')
-      .update({ expires_at: newExpiry.toISOString() })
-      .eq('id', payment.id);
+
+  if (bonusDays > 0) {
+    if (payment.expires_at) {
+      // 이미 승인된 구독(expires_at 존재) → 즉시 기간 연장
+      const newExpiry = new Date(
+        new Date(payment.expires_at).getTime() + bonusDays * 86400 * 1000
+      );
+      await supabaseAdmin
+        .from('payments')
+        .update({ expires_at: newExpiry.toISOString() })
+        .eq('id', payment.id);
+    } else {
+      // 아직 pending_approval(expires_at 없음) → 별도 컬럼에 보류 기록
+      // approve API에서 review_bonus_days_pending을 반영해야 함
+      await supabaseAdmin
+        .from('payments')
+        .update({ review_bonus_days_pending: bonusDays })
+        .eq('id', payment.id);
+    }
     bonusApplied = true;
   }
 
   return NextResponse.json({
     success: true,
     bonusApplied,
-    bonusDays: creator.review_bonus_days,
+    bonusDays,
   });
 }
