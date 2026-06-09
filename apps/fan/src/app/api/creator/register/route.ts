@@ -23,6 +23,13 @@ export async function POST(req: NextRequest) {
     publicProfileUrl,
     publicProfileName,
     notificationChatId,
+    freeTrialEnabled,
+    freeTrialDays,
+    referralEnabled,
+    referralBonusDays,
+    referralFriendDiscount,
+    reviewsEnabled,
+    reviewBonusDays,
   } = await req.json();
 
   if (!paymentAddress || !subscriptionPriceTon || !telegramChannelLink) {
@@ -46,6 +53,13 @@ export async function POST(req: NextRequest) {
         telegram_chat_id: notificationChatId || session.user.telegramId,
         link_slug: generateSlug(session.user.telegramUsername || session.user.telegramName || 'user'),
         is_active: true,
+        free_trial_enabled: freeTrialEnabled || false,
+        free_trial_days: freeTrialDays || 3,
+        referral_enabled: referralEnabled || false,
+        referral_bonus_days: referralBonusDays || 7,
+        referral_friend_discount_pct: referralFriendDiscount || 0,
+        reviews_enabled: reviewsEnabled ?? true,
+        review_bonus_days: reviewBonusDays || 1,
       },
       { onConflict: 'twitter_id', ignoreDuplicates: false },
     )
