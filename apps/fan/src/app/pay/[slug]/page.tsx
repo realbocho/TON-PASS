@@ -544,10 +544,10 @@ function SuccessScreen({ channelLink, channelName, telegramUsername, onReview, s
   return (
     <div className="fade-up" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '16px', justifyContent: 'center' }}>
       <div style={{ textAlign: 'center', padding: '24px 0' }}>
-        <div style={{ fontSize: '56px', marginBottom: '12px' }}>🎉</div>
-        <h2 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '8px' }}>Payment Confirmed!</h2>
+        <div style={{ fontSize: '56px', marginBottom: '12px' }}>⏳</div>
+        <h2 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '8px' }}>Request Submitted!</h2>
         <p style={{ color: 'var(--text-muted)', fontSize: '13px', lineHeight: 1.6 }}>
-          Your payment has been received. The creator will send you a private channel invite link shortly.
+          Your request is pending approval. The creator will review it and send you a private channel invite link shortly.
         </p>
       </div>
 
