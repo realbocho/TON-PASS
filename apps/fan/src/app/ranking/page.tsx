@@ -28,7 +28,7 @@ export default function RankingPage() {
 
   async function fetchRanking() {
     try {
-      const res = await fetch('/api/ranking');
+      const res = await fetch('/api/ranking', { cache: 'no-store' });
       const data = await res.json();
       setRanking(data.ranking || []);
     } catch {
@@ -161,15 +161,12 @@ export default function RankingPage() {
                 </div>
               </button>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '3px' }}>
-                {item.avgRating > 0 && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-                    <span style={{ fontSize: '11px', color: 'var(--yellow)' }}>{'⭐'.repeat(Math.round(item.avgRating))}</span>
-                    <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                      {item.avgRating.toFixed(1)} ({item.reviewCount})
-                    </span>
+                {item.reviewCount > 0 ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <span style={{ fontSize: '12px', color: 'var(--yellow)', fontWeight: 600 }}>⭐ {item.avgRating.toFixed(1)}</span>
+                    <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>({item.reviewCount})</span>
                   </div>
-                )}
-                {item.avgRating === 0 && (
+                ) : (
                   <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>No reviews yet</div>
                 )}
               </div>
