@@ -27,17 +27,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Creator not found' }, { status: 404 });
   }
 
-  // Check existing active subscription
+  // fan_telegram_id 기준 중복 체크
   const { data: existing } = await supabaseAdmin
     .from('payments')
     .select('id, status, expires_at')
     .eq('creator_id', creator.id)
-    .eq('fan_twitter_id', session.user.telegramId)
+    .eq('fan_telegram_id', session.user.telegramId)
     .in('status', ['pending_approval', 'approved'])
     .single();
 
   if (existing) {
-    // Allow renewal if expiring within 3 days
+    // 만료 3일 이내면 갱신 허용
     if (existing.status === 'approved' && existing.expires_at) {
       const daysLeft = (new Date(existing.expires_at).getTime() - Date.now()) / 86400000;
       if (daysLeft > 3) {
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
           { status: 409 },
         );
       }
-      // Allow renewal - expire the old one
+      // 갱신 허용 - 기존 만료 처리
       await supabaseAdmin
         .from('payments')
         .update({ status: 'expired' })
