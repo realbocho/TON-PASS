@@ -133,12 +133,11 @@ export default function DashboardPage() {
       return;
     }
 
-    // username 없고 id만 있는 경우 — Mini App 밖(브라우저)에서만 tg:// 동작
+    // username 없고 id만 있는 경우 — openLink로 tg:// 스킴 사용
     if (telegramId) {
       const tgUrl = `tg://user?id=${telegramId}`;
-      const webUrl = `https://t.me/user?id=${telegramId}`;
-      if (tg?.openTelegramLink) {
-        tg.openTelegramLink(webUrl);
+      if (tg?.openLink) {
+        tg.openLink(tgUrl);
       } else {
         window.open(tgUrl, '_blank');
       }
