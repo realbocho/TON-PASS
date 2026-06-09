@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
   const { data: creator } = await supabaseAdmin
     .from('creators')
     .select('id')
-    .eq('twitter_id', session.user.telegramId)
+    .eq('telegram_id', session.user.telegramId)
     .single();
 
   if (!creator) {
