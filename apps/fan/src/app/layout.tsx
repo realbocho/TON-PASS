@@ -10,7 +10,7 @@ const manifestUrl =
   process.env.NEXT_PUBLIC_TONCONNECT_MANIFEST_URL ||
   'https://ton-pass.vercel.app/tonconnect-manifest.json';
 
-const TGA_TOKEN = 'eyJhcHBfbmFtZSI6InRvbl9wYXNzIiwiYXBwX3VybCI6Imh0dHBzOi8vdC5tZS9UT05fcGFzc19ib3QiLCJhcHBfZG9tYWluIjoiaHR0cHM6Ly90b24tcGFzcy52ZXJjZWwuYXBwIn0=!oUOT2W2zad3JOwTtnpyTwEpry0koy/HfORw7CTLtoD4=';
+const TGA_TOKEN = 'eyJhcHBfbmFtZSI6InRvbnBhc3MiLCJhcHBfdXJsIjoiaHR0cHM6Ly90Lm1lL1RPTl9wYXNzX2JvdCIsImFwcF9kb21haW4iOiJodHRwczovL3Rvbi1wYXNzLnZlcmNlbC5hcHAifQ==!3/V/NrtRx0eLM01FlfGc0INDfIVN8QDUaFMrmReMxEc=';
 
 function TelegramInit() {
   const { status } = useSession();
@@ -20,20 +20,21 @@ function TelegramInit() {
     if (initialized.current) return;
     initialized.current = true;
 
+    // Telegram Analytics - load unconditionally so it isn't skipped
+    // if Telegram WebApp script hasn't finished loading yet (race condition)
+    const script = document.createElement('script');
+    script.src = 'https://tganalytics.xyz/index.js';
+    script.async = true;
+    script.onload = () => {
+      (window as any).telegramAnalytics?.init({ token: TGA_TOKEN, appName: 'tonpass' });
+    };
+    document.head.appendChild(script);
+
     const tg = (window as any).Telegram?.WebApp;
     if (!tg?.initData) return;
 
     tg.ready();
     tg.expand();
-
-    // Telegram Analytics
-    const script = document.createElement('script');
-    script.src = 'https://tganalytics.xyz/index.js';
-    script.async = true;
-    script.onload = () => {
-      (window as any).telegramAnalytics?.init({ token: TGA_TOKEN, appName: 'ton_pass' });
-    };
-    document.head.appendChild(script);
 
     // Handle startapp via initDataUnsafe (middleware handles URL params)
     const urlParams = new URLSearchParams(window.location.search);
