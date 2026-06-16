@@ -23,7 +23,8 @@ export async function GET(req: NextRequest) {
     .from('creators')
     .select('id, twitter_username, twitter_avatar, public_profile_url, public_twitter_url, link_slug')
     .in('id', ids)
-    .eq('is_active', true);
+    .eq('is_active', true)
+    .eq('show_in_ranking', true);
 
   const creatorMap = Object.fromEntries((creators || []).map((c: any) => [c.id, c]));
   const statMap = Object.fromEntries((stats || []).map((d: any) => [d.id, d]));
