@@ -38,6 +38,7 @@ export default function SettingsPage() {
         referralFriendDiscount: data.creator.referral_friend_discount_pct?.toString() || '0',
         reviewsEnabled: data.creator.reviews_enabled ?? true,
         reviewBonusDays: data.creator.review_bonus_days?.toString() || '1',
+        showInRanking: data.creator.show_in_ranking ?? true,
       });
     }
     setLoading(false);
@@ -71,6 +72,7 @@ export default function SettingsPage() {
           referral_friend_discount_pct: parseInt(form.referralFriendDiscount) || 0,
           reviews_enabled: form.reviewsEnabled,
           review_bonus_days: parseInt(form.reviewBonusDays) || 1,
+          show_in_ranking: form.showInRanking,
         }),
       });
       if (!res.ok) throw new Error();
@@ -191,6 +193,26 @@ export default function SettingsPage() {
             : <span style={{ color: 'var(--text-muted)' }}>(paused)</span>}
         </span>
       </label>
+
+      {/* Ranking Visibility */}
+      <div style={{ padding: '14px', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <label style={{ display: 'flex', gap: '12px', alignItems: 'center', cursor: 'pointer' }}>
+          <div onClick={() => set('showInRanking', !form.showInRanking)} style={{
+            width: 44, height: 24, borderRadius: '12px', position: 'relative',
+            background: form.showInRanking ? 'var(--green)' : 'var(--border)', transition: 'background 0.2s',
+          }}>
+            <div style={{ position: 'absolute', top: 2, left: form.showInRanking ? 22 : 2, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.2s' }} />
+          </div>
+          <div>
+            <div style={{ fontSize: '14px', fontWeight: 600 }}>🏆 Show in Rankings</div>
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+              {form.showInRanking
+                ? 'Your profile is visible on the public ranking page.'
+                : 'Your profile is hidden from the public ranking page.'}
+            </div>
+          </div>
+        </label>
+      </div>
 
       {error && (
         <div style={{ padding: '10px', background: 'var(--red-dim)', color: 'var(--red)', borderRadius: 'var(--radius-sm)', fontSize: '13px' }}>
