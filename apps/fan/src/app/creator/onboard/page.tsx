@@ -24,6 +24,7 @@ export default function OnboardPage() {
     referralFriendDiscount: '0',
     reviewsEnabled: true,
     reviewBonusDays: '1',
+    showInRanking: true,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -59,6 +60,7 @@ export default function OnboardPage() {
           referralFriendDiscount: parseInt(form.referralFriendDiscount) || 0,
           reviewsEnabled: form.reviewsEnabled,
           reviewBonusDays: parseInt(form.reviewBonusDays) || 1,
+          showInRanking: form.showInRanking,
         }),
       });
       const data = await res.json();
@@ -297,6 +299,27 @@ export default function OnboardPage() {
                 <input className="input" type="number" min="0" max="7" value={form.reviewBonusDays} onChange={e => set('reviewBonusDays', e.target.value)} />
               </div>
             )}
+          </div>
+        </section>
+
+        {/* Ranking */}
+        <section>
+          <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>08 — Ranking</div>
+          <div style={{ padding: '14px', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <label style={{ display: 'flex', gap: '12px', alignItems: 'center', cursor: 'pointer' }}>
+              <div onClick={() => set('showInRanking', !form.showInRanking)} style={{
+                width: 44, height: 24, borderRadius: '12px', position: 'relative',
+                background: form.showInRanking ? 'var(--green)' : 'var(--border)', transition: 'background 0.2s',
+              }}>
+                <div style={{ position: 'absolute', top: 2, left: form.showInRanking ? 22 : 2, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.2s' }} />
+              </div>
+              <div>
+                <div style={{ fontSize: '14px', fontWeight: 600 }}>🏆 Show in Rankings</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                  {form.showInRanking ? 'Your profile will appear on the public ranking page.' : 'Your profile will be hidden from the public ranking page.'}
+                </div>
+              </div>
+            </label>
           </div>
         </section>
 
