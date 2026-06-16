@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
     referralFriendDiscount,
     reviewsEnabled,
     reviewBonusDays,
+    showInRanking,
   } = await req.json();
 
   if (!paymentAddress || !subscriptionPriceTon || !telegramChannelLink) {
@@ -60,6 +61,7 @@ export async function POST(req: NextRequest) {
         referral_friend_discount_pct: referralFriendDiscount || 0,
         reviews_enabled: reviewsEnabled ?? true,
         review_bonus_days: reviewBonusDays || 1,
+        show_in_ranking: showInRanking ?? true,
       },
       { onConflict: 'telegram_id', ignoreDuplicates: false },
     )
