@@ -30,6 +30,7 @@ export async function PATCH(req: NextRequest) {
     'referral_friend_discount_pct',
     'reviews_enabled',
     'review_bonus_days',
+    'show_in_ranking',
   ];
 
   const filtered = Object.fromEntries(
