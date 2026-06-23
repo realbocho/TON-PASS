@@ -31,10 +31,37 @@ export async function POST(req: NextRequest) {
     reviewsEnabled,
     reviewBonusDays,
     showInRanking,
+    referrerInviteCode,  // 크리에이터 초대 코드 (revenue share 레퍼럴)
   } = await req.json();
 
   if (!paymentAddress || !subscriptionPriceTon || !telegramChannelLink) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+  }
+
+  // 이미 등록된 크리에이터인지 확인 (이미 가입한 경우 referred_by 변경 불가)
+  const { data: existingCreator } = await supabaseAdmin
+    .from('creators')
+    .select('id, referred_by_creator_id')
+    .eq('telegram_id', session.user.telegramId)
+    .single();
+
+  // 초대 코드 처리: 신규 가입 시에만 적용
+  let referredByCreatorId: string | null = existingCreator?.referred_by_creator_id || null;
+  if (!existingCreator && referrerInviteCode) {
+    const { data: inviteLink } = await supabaseAdmin
+      .from('creator_referral_links')
+      .select('id, referrer_creator_id')
+      .eq('invite_code', referrerInviteCode.toUpperCase())
+      .single();
+
+    if (inviteLink) {
+      referredByCreatorId = inviteLink.referrer_creator_id;
+      // 초대 링크 사용 횟수 증가
+      await supabaseAdmin
+        .from('creator_referral_links')
+        .update({ signup_count: inviteLink.signup_count + 1 } as any)
+        .eq('id', inviteLink.id);
+    }
   }
 
   const { data: creator, error } = await supabaseAdmin
@@ -62,6 +89,8 @@ export async function POST(req: NextRequest) {
         reviews_enabled: reviewsEnabled ?? true,
         review_bonus_days: reviewBonusDays || 1,
         show_in_ranking: showInRanking ?? true,
+        // 신규 가입 시에만 추천인 설정 (기존 크리에이터는 무시)
+        ...(referredByCreatorId && !existingCreator ? { referred_by_creator_id: referredByCreatorId } : {}),
       },
       { onConflict: 'telegram_id', ignoreDuplicates: false },
     )
