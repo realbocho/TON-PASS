@@ -1,13 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import TelegramLoginButton from '@/components/TelegramLoginButton';
 
 export default function OnboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // ?ref=CR-XXXXX 파라미터로 넘어온 크리에이터 초대 코드
+  const refCode = searchParams.get('ref');
+  const [referrerInfo, setReferrerInfo] = useState<{ name: string; pct: number } | null>(null);
 
   const [form, setForm] = useState({
     paymentAddress: '',
@@ -28,6 +33,19 @@ export default function OnboardPage() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // 초대 코드 검증
+  useEffect(() => {
+    if (!refCode) return;
+    fetch(`/api/creator/revenue-share/validate?code=${refCode}`)
+      .then(r => r.json())
+      .then(d => {
+        if (d.valid) {
+          setReferrerInfo({ name: d.referrerName, pct: d.revenueSharePct });
+        }
+      })
+      .catch(() => {});
+  }, [refCode]);
 
   function set(field: string, value: string | boolean) {
     setForm(f => ({ ...f, [field]: value }));
@@ -61,6 +79,7 @@ export default function OnboardPage() {
           reviewsEnabled: form.reviewsEnabled,
           reviewBonusDays: parseInt(form.reviewBonusDays) || 1,
           showInRanking: form.showInRanking,
+          referrerInviteCode: refCode || null,  // 크리에이터 초대 코드
         }),
       });
       const data = await res.json();
@@ -112,6 +131,25 @@ export default function OnboardPage() {
       </div>
 
 
+
+      {/* 초대 코드 배너 */}
+      {refCode && referrerInfo && (
+        <div style={{
+          marginBottom: '16px', padding: '12px 14px',
+          borderRadius: 'var(--radius-sm)',
+          background: 'linear-gradient(135deg, rgba(0,163,255,0.12), rgba(0,255,200,0.06))',
+          border: '1px solid rgba(0,163,255,0.25)',
+          display: 'flex', alignItems: 'center', gap: '10px',
+        }}>
+          <div style={{ fontSize: '24px' }}>🎉</div>
+          <div>
+            <div style={{ fontSize: '13px', fontWeight: 700 }}>Invited by {referrerInfo.name}</div>
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+              <strong style={{ color: 'var(--ton)' }}>{referrerInfo.pct}%</strong> of your subscription fees will be automatically shared with your referrer
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Pre-setup guide */}
       <div style={{ marginBottom: '24px', padding: '16px', borderRadius: 'var(--radius-lg)', background: 'linear-gradient(135deg, rgba(0,212,255,0.06), rgba(0,152,234,0.06))', border: '1px solid rgba(0,212,255,0.15)' }}>
