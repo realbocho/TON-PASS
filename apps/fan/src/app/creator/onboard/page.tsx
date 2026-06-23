@@ -153,8 +153,8 @@ function OnboardInner() {
           <div style={{ fontSize: '24px' }}>🎉</div>
           <div>
             <div style={{ fontSize: '13px', fontWeight: 700 }}>Invited by {referrerInfo.name}</div>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
-              <strong style={{ color: 'var(--ton)' }}>{referrerInfo.pct}%</strong> of your subscription fees will be automatically shared with your referrer
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px', lineHeight: 1.6 }}>
+              <strong style={{ color: 'var(--ton)' }}>{referrerInfo.pct}%</strong> of the <strong style={{ color: 'var(--text)' }}>platform fee</strong> will go to your referrer — your own earnings are never affected.
             </div>
           </div>
         </div>
@@ -432,8 +432,8 @@ function InviteCodeInput({ onValidated }: {
         <div style={{ fontSize: '22px' }}>🎉</div>
         <div>
           <div style={{ fontSize: '13px', fontWeight: 700 }}>Invited by {confirmed.name}</div>
-          <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
-            <strong style={{ color: 'var(--ton)' }}>{confirmed.pct}%</strong> of your fees will be shared with your referrer
+          <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px', lineHeight: 1.6 }}>
+            <strong style={{ color: 'var(--ton)' }}>{confirmed.pct}%</strong> of the <strong style={{ color: 'var(--text)' }}>platform fee</strong> goes to your referrer — your own earnings are never affected.
           </div>
         </div>
       </div>
