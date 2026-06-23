@@ -39,6 +39,8 @@ export default function SettingsPage() {
         reviewsEnabled: data.creator.reviews_enabled ?? true,
         reviewBonusDays: data.creator.review_bonus_days?.toString() || '1',
         showInRanking: data.creator.show_in_ranking ?? true,
+        revenueShareEnabled: data.creator.revenue_share_enabled ?? true,
+        revenueSharePct: data.creator.revenue_share_pct?.toString() || '20',
       });
     }
     setLoading(false);
@@ -73,6 +75,8 @@ export default function SettingsPage() {
           reviews_enabled: form.reviewsEnabled,
           review_bonus_days: parseInt(form.reviewBonusDays) || 1,
           show_in_ranking: form.showInRanking,
+          revenue_share_enabled: form.revenueShareEnabled,
+          revenue_share_pct: parseInt(form.revenueSharePct) || 20,
         }),
       });
       if (!res.ok) throw new Error();
@@ -212,6 +216,33 @@ export default function SettingsPage() {
             </div>
           </div>
         </label>
+      </div>
+
+      {/* Revenue Share */}
+      <div style={{ padding: '14px', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <label style={{ display: 'flex', gap: '12px', alignItems: 'center', cursor: 'pointer' }}>
+          <div onClick={() => set('revenueShareEnabled', !form.revenueShareEnabled)} style={{
+            width: 44, height: 24, borderRadius: '12px', position: 'relative',
+            background: form.revenueShareEnabled ? 'var(--ton)' : 'var(--border)', transition: 'background 0.2s',
+          }}>
+            <div style={{ position: 'absolute', top: 2, left: form.revenueShareEnabled ? 22 : 2, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.2s' }} />
+          </div>
+          <div>
+            <div style={{ fontSize: '14px', fontWeight: 600 }}>💰 Revenue Share Referral</div>
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+              Automatically share a portion of your fees with the creator who invited you
+            </div>
+          </div>
+        </label>
+        {form.revenueShareEnabled && (
+          <div className="input-wrap">
+            <label className="input-label">Referrer Share (%)</label>
+            <input className="input" type="number" min="5" max="50" value={form.revenueSharePct || '20'} onChange={e => set('revenueSharePct', e.target.value)} />
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
+              e.g. 20% → if your fee is 0.5 TON, your referrer earns 0.1 TON automatically
+            </div>
+          </div>
+        )}
       </div>
 
       {error && (
