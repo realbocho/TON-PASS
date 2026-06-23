@@ -505,36 +505,36 @@ function RevenueSharePanel({
         background: 'linear-gradient(135deg, rgba(0,163,255,0.1), rgba(0,255,200,0.05))',
         border: '1px solid rgba(0,163,255,0.2)',
       }}>
-        <div style={{ fontSize: '13px', fontWeight: 700, marginBottom: '6px' }}>💰 수수료 쉐어 레퍼럴</div>
+        <div style={{ fontSize: '13px', fontWeight: 700, marginBottom: '6px' }}>💰 Revenue Share Referral</div>
         <div style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: 1.6 }}>
-          다른 크리에이터를 초대하면, 그 크리에이터의 구독 수수료 중 <strong style={{ color: 'var(--ton)' }}>{RS_PCT}%</strong>를
-          매달 자동으로 적립받습니다. 초대한 크리에이터가 클수록, 내 수익도 무한히 커집니다.
+          Invite other creators and earn <strong style={{ color: 'var(--ton)' }}>{RS_PCT}%</strong> of their
+          subscription fees — automatically, every month, forever.
         </div>
       </div>
 
-      {/* 수익 통계 */}
+      {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
         <div className="card" style={{ padding: '12px', textAlign: 'center' }}>
           <div style={{ fontFamily: 'JetBrains Mono', fontSize: '18px', fontWeight: 700, color: 'var(--ton)' }}>
             {(data.stats?.totalEarnedTon || 0).toFixed(2)}
           </div>
-          <div style={{ fontSize: '9px', color: 'var(--text-muted)', marginTop: '2px' }}>누적 TON</div>
+          <div style={{ fontSize: '9px', color: 'var(--text-muted)', marginTop: '2px' }}>TOTAL TON</div>
         </div>
         <div className="card" style={{ padding: '12px', textAlign: 'center' }}>
           <div style={{ fontFamily: 'JetBrains Mono', fontSize: '18px', fontWeight: 700, color: 'var(--green)' }}>
             {(data.stats?.thisMonthEarnedTon || 0).toFixed(2)}
           </div>
-          <div style={{ fontSize: '9px', color: 'var(--text-muted)', marginTop: '2px' }}>이번달 TON</div>
+          <div style={{ fontSize: '9px', color: 'var(--text-muted)', marginTop: '2px' }}>THIS MONTH</div>
         </div>
         <div className="card" style={{ padding: '12px', textAlign: 'center' }}>
           <div style={{ fontFamily: 'JetBrains Mono', fontSize: '18px', fontWeight: 700 }}>
             {data.stats?.referredCount || 0}
           </div>
-          <div style={{ fontSize: '9px', color: 'var(--text-muted)', marginTop: '2px' }}>초대한 크리에이터</div>
+          <div style={{ fontSize: '9px', color: 'var(--text-muted)', marginTop: '2px' }}>INVITED</div>
         </div>
       </div>
 
-      {/* 미지급 잔액 */}
+      {/* Pending balance */}
       {(data.pendingTon || 0) > 0 && (
         <div style={{
           padding: '14px', borderRadius: 'var(--radius-sm)',
@@ -542,22 +542,22 @@ function RevenueSharePanel({
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         }}>
           <div>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>미지급 잔액</div>
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Pending Balance</div>
             <div style={{ fontFamily: 'JetBrains Mono', fontSize: '20px', fontWeight: 700, color: 'var(--green)' }}>
               {(data.pendingTon || 0).toFixed(4)} TON
             </div>
           </div>
           <div style={{ fontSize: '11px', color: 'var(--text-muted)', textAlign: 'right' }}>
-            출금 기능<br/>준비 중
+            Withdrawal<br/>coming soon
           </div>
         </div>
       )}
 
-      {/* 내 초대 링크 */}
+      {/* Invite link */}
       <div style={{ padding: '14px', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
-        <div style={{ fontSize: '12px', fontWeight: 700, marginBottom: '10px' }}>🔗 내 크리에이터 초대 링크</div>
+        <div style={{ fontSize: '12px', fontWeight: 700, marginBottom: '10px' }}>🔗 Your Creator Invite Link</div>
         <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '8px' }}>
-          이 링크로 가입한 크리에이터의 수수료 <strong style={{ color: 'var(--ton)' }}>{RS_PCT}%</strong>가 평생 적립됩니다
+          Creators who sign up via this link share <strong style={{ color: 'var(--ton)' }}>{RS_PCT}%</strong> of their fees with you — for life
         </div>
         <div style={{
           display: 'flex', gap: '8px', alignItems: 'center',
@@ -565,28 +565,28 @@ function RevenueSharePanel({
           marginBottom: '8px',
         }}>
           <span style={{ fontSize: '10px', fontFamily: 'JetBrains Mono', color: 'var(--ton)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            코드: {data.inviteCode}
+            Code: {data.inviteCode}
           </span>
         </div>
         <button className="btn btn-primary btn-full btn-sm" onClick={onCopyInvite}>
-          {inviteCopied ? '✓ 복사됨!' : '📋 초대 링크 복사'}
+          {inviteCopied ? '✓ Copied!' : '📋 Copy Invite Link'}
         </button>
       </div>
 
-      {/* 초대한 크리에이터 목록 */}
+      {/* Referred creators list */}
       {data.referredCreators?.length > 0 && (
         <div>
-          <div style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>👥 초대한 크리에이터 ({data.referredCreators.length})</div>
+          <div style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>👥 Invited Creators ({data.referredCreators.length})</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {data.referredCreators.map((rc: any) => (
               <div key={rc.id} className="card" style={{ padding: '12px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
                     <div style={{ fontSize: '13px', fontWeight: 600 }}>
-                      {rc.public_profile_name || rc.telegram_channel_name || '크리에이터'}
+                      {rc.public_profile_name || rc.telegram_channel_name || 'Creator'}
                     </div>
                     <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                      가입일: {new Date(rc.created_at).toLocaleDateString('ko-KR')}
+                      Joined {new Date(rc.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                     </div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
@@ -594,7 +594,7 @@ function RevenueSharePanel({
                       +{(rc.total_earned_ton || 0).toFixed(4)}
                     </div>
                     <div style={{ fontSize: '9px', color: 'var(--text-muted)' }}>
-                      이번달 +{(rc.this_month_earned_ton || 0).toFixed(4)} TON
+                      this month +{(rc.this_month_earned_ton || 0).toFixed(4)} TON
                     </div>
                   </div>
                 </div>
@@ -604,10 +604,10 @@ function RevenueSharePanel({
         </div>
       )}
 
-      {/* 최근 수익 내역 */}
+      {/* Recent earnings */}
       {data.recentEarnings?.length > 0 && (
         <div>
-          <div style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>📋 최근 수익 내역</div>
+          <div style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>📋 Recent Earnings</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {data.recentEarnings.slice(0, 10).map((e: any) => (
               <div key={e.id} style={{
@@ -617,10 +617,10 @@ function RevenueSharePanel({
               }}>
                 <div>
                   <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                    수수료 {(e.source_fee_ton || 0).toFixed(4)} TON의 {e.share_pct}%
+                    {e.share_pct}% of {(e.source_fee_ton || 0).toFixed(4)} TON fee
                   </div>
                   <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '1px' }}>
-                    {new Date(e.created_at).toLocaleDateString('ko-KR')}
+                    {new Date(e.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </div>
                 </div>
                 <div style={{ fontFamily: 'JetBrains Mono', fontSize: '13px', fontWeight: 700, color: 'var(--green)' }}>
@@ -632,14 +632,14 @@ function RevenueSharePanel({
         </div>
       )}
 
-      {/* 아직 초대한 크리에이터 없음 */}
+      {/* Empty state */}
       {(!data.referredCreators || data.referredCreators.length === 0) && (
         <div style={{ textAlign: 'center', padding: '32px 24px', color: 'var(--text-muted)', fontSize: '13px' }}>
           <div style={{ fontSize: '36px', marginBottom: '12px' }}>🚀</div>
-          <div style={{ fontWeight: 600, marginBottom: '6px' }}>아직 초대한 크리에이터가 없어요</div>
+          <div style={{ fontWeight: 600, marginBottom: '6px' }}>No invited creators yet</div>
           <div style={{ fontSize: '11px' }}>
-            위 초대 링크를 동료 크리에이터에게 공유하면<br />
-            그들의 수수료 수익 {RS_PCT}%가 평생 자동으로 적립됩니다
+            Share your invite link with fellow creators.<br />
+            You'll earn {RS_PCT}% of their fees automatically, forever.
           </div>
         </div>
       )}
