@@ -21,6 +21,7 @@ function OnboardInner() {
   // ?ref=CR-XXXXX 파라미터로 넘어온 크리에이터 초대 코드
   const refCode = searchParams.get('ref');
   const [referrerInfo, setReferrerInfo] = useState<{ name: string; pct: number } | null>(null);
+  const [manualRefCode, setManualRefCode] = useState<string | null>(null);
 
   const [form, setForm] = useState({
     paymentAddress: '',
@@ -87,7 +88,7 @@ function OnboardInner() {
           reviewsEnabled: form.reviewsEnabled,
           reviewBonusDays: parseInt(form.reviewBonusDays) || 1,
           showInRanking: form.showInRanking,
-          referrerInviteCode: refCode || null,  // 크리에이터 초대 코드
+          referrerInviteCode: refCode || manualRefCode || null,  // 크리에이터 초대 코드
         }),
       });
       const data = await res.json();
@@ -375,10 +376,97 @@ function OnboardInner() {
           </div>
         )}
 
+        {/* Invite code manual input */}
+        {!refCode && (
+          <InviteCodeInput onValidated={(name, pct, code) => {
+            setReferrerInfo({ name, pct });
+            setManualRefCode(code);
+          }} />
+        )}
+
         <button className="btn btn-primary btn-full btn-lg" onClick={handleSubmit} disabled={loading} style={{ marginTop: 'auto' }}>
           {loading ? <><span className="spinner" style={{ width: 18, height: 18, borderWidth: 2 }} /> Saving…</> : '🚀 Create My Payment Page'}
         </button>
       </div>
     </main>
+  );
+}
+
+function InviteCodeInput({ onValidated }: {
+  onValidated: (name: string, pct: number, code: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [code, setCode] = useState('');
+  const [checking, setChecking] = useState(false);
+  const [error, setError] = useState('');
+  const [confirmed, setConfirmed] = useState<{ name: string; pct: number } | null>(null);
+
+  async function handleApply() {
+    if (!code.trim()) return;
+    setChecking(true);
+    setError('');
+    try {
+      const res = await fetch(`/api/creator/revenue-share/validate?code=${code.trim()}`);
+      const data = await res.json();
+      if (!data.valid) {
+        setError('Invalid invite code. Please check and try again.');
+      } else {
+        setConfirmed({ name: data.referrerName, pct: data.revenueSharePct });
+        onValidated(data.referrerName, data.revenueSharePct, code.trim());
+      }
+    } catch {
+      setError('Failed to validate. Please try again.');
+    } finally {
+      setChecking(false);
+    }
+  }
+
+  if (confirmed) {
+    return (
+      <div style={{
+        padding: '12px 14px', borderRadius: 'var(--radius-sm)',
+        background: 'linear-gradient(135deg, rgba(0,163,255,0.12), rgba(0,255,200,0.06))',
+        border: '1px solid rgba(0,163,255,0.25)',
+        display: 'flex', alignItems: 'center', gap: '10px',
+      }}>
+        <div style={{ fontSize: '22px' }}>🎉</div>
+        <div>
+          <div style={{ fontSize: '13px', fontWeight: 700 }}>Invited by {confirmed.name}</div>
+          <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+            <strong style={{ color: 'var(--ton)' }}>{confirmed.pct}%</strong> of your fees will be shared with your referrer
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '12px', cursor: 'pointer', padding: '4px 0', textDecoration: 'underline' }}
+      >
+        Have an invite code?
+      </button>
+    );
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      <div style={{ fontSize: '12px', fontWeight: 600 }}>Invite Code</div>
+      <div style={{ display: 'flex', gap: '8px' }}>
+        <input
+          className="input"
+          placeholder="CR-XXXXXX"
+          value={code}
+          onChange={e => setCode(e.target.value.toUpperCase())}
+          style={{ flex: 1, fontFamily: 'JetBrains Mono', letterSpacing: '0.05em' }}
+        />
+        <button className="btn btn-primary btn-sm" onClick={handleApply} disabled={checking || !code.trim()}>
+          {checking ? <span className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /> : 'Apply'}
+        </button>
+      </div>
+      {error && <div style={{ fontSize: '11px', color: 'var(--red)' }}>{error}</div>}
+    </div>
   );
 }
