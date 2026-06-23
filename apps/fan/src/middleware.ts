@@ -17,6 +17,12 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL(`/pay/${slug}`, req.url));
   }
 
+  // 크리에이터 초대 링크: ref-CR-XXXXX → /creator/onboard?ref=CR-XXXXX
+  if (startParam.startsWith('ref-')) {
+    const code = startParam.replace('ref-', '');
+    return NextResponse.redirect(new URL(`/creator/onboard?ref=${code}`, req.url));
+  }
+
   return NextResponse.next();
 }
 
