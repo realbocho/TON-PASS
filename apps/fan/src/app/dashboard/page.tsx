@@ -511,6 +511,13 @@ function RevenueSharePanel({
           <strong style={{ color: 'var(--ton)' }}>{RS_PCT}% of the platform fee</strong> goes{' '}
           <strong style={{ color: 'var(--ton)' }}>directly to your TON wallet</strong> — instantly, forever.
         </div>
+        <div style={{
+          marginTop: '10px', padding: '8px 10px', borderRadius: 'var(--radius-sm)',
+          background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)',
+          fontSize: '11px', color: 'var(--text-muted)', lineHeight: 1.6,
+        }}>
+          💡 The invited creator keeps <strong style={{ color: 'var(--text)' }}>100% of their earnings</strong> — your share comes entirely from the platform's fee. Nobody loses anything.
+        </div>
         <div style={{ marginTop: '10px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
           {[
             `Fan pays 100 TON`,
