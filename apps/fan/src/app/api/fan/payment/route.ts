@@ -16,10 +16,10 @@ export async function POST(req: NextRequest) {
 
   const { creatorSlug } = await req.json();
 
-  // Get creator
+  // Get creator + referrer info
   const { data: creator, error: creatorError } = await supabaseAdmin
     .from('creators')
-    .select('*')
+    .select('*, referred_by:referred_by_creator_id(payment_address, revenue_share_enabled, revenue_share_pct)')
     .eq('link_slug', creatorSlug)
     .eq('is_active', true)
     .single();
@@ -46,6 +46,18 @@ export async function POST(req: NextRequest) {
 
   const fees = calculateFee(creator.subscription_price_ton);
 
+  // 추천인 revenue share 계산
+  const referrer = (creator as any).referred_by;
+  let referrerShareNano = BigInt(0);
+  let platformNano = toNano(fees.fee);
+
+  if (referrer?.payment_address && referrer?.revenue_share_enabled) {
+    const sharePct = referrer.revenue_share_pct ?? 20;
+    // 수수료의 sharePct% → 추천인, 나머지 → 운영자
+    referrerShareNano = toNano(fees.fee) * BigInt(sharePct) / BigInt(100);
+    platformNano = toNano(fees.fee) - referrerShareNano;
+  }
+
   // Create payment record
   const { data: payment, error } = await supabaseAdmin
     .from('payments')
@@ -69,24 +81,33 @@ export async function POST(req: NextRequest) {
   }
 
   const comment = buildPaymentComment(payment.id);
-  const creatorAmountNano = toNano(fees.amount).toString();
-  const feeAmountNano = toNano(fees.fee).toString();
+
+  const messages: { address: string; amountNano: string; comment: string }[] = [
+    {
+      address: creator.payment_address,
+      amountNano: toNano(fees.amount).toString(),
+      comment,
+    },
+    {
+      address: PLATFORM_WALLET,
+      amountNano: platformNano.toString(),
+      comment: `FEE-${payment.id}`,
+    },
+  ];
+
+  // 추천인 몫 메시지 추가
+  if (referrer?.payment_address && referrerShareNano > BigInt(0)) {
+    messages.push({
+      address: referrer.payment_address,
+      amountNano: referrerShareNano.toString(),
+      comment: `REF-${payment.id}`,
+    });
+  }
 
   return NextResponse.json({
     payment,
     tonPayment: {
-      messages: [
-        {
-          address: creator.payment_address,
-          amountNano: creatorAmountNano,
-          comment,
-        },
-        {
-          address: PLATFORM_WALLET,
-          amountNano: feeAmountNano,
-          comment: `FEE-${payment.id}`,
-        },
-      ],
+      messages,
       amountTon: fees.amount,
       feeTon: fees.fee,
       totalTon: fees.total,
