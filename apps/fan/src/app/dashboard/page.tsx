@@ -191,10 +191,8 @@ export default function DashboardPage() {
   ];
 
   function copyInviteLink() {
-    if (revenueShare?.inviteCode) {
-      const botName = process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || 'TON_pass_bot';
-      const inviteUrl = `https://t.me/${botName}/tps?startapp=ref-${revenueShare.inviteCode}`;
-      navigator.clipboard?.writeText(inviteUrl);
+    if (revenueShare?.inviteUrl) {
+      navigator.clipboard?.writeText(revenueShare.inviteUrl);
       setInviteCopied(true);
       setTimeout(() => setInviteCopied(false), 2000);
     }
@@ -495,144 +493,131 @@ function RevenueSharePanel({
   }
 
   const RS_PCT = data.revenueSharePct ?? 20;
+  const referredCreators: any[] = data.referredCreators || [];
+  const activeCount = referredCreators.filter((r: any) => r.isActive).length;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
 
-      {/* 설명 배너 */}
+      {/* How it works */}
       <div style={{
         padding: '14px', borderRadius: 'var(--radius-sm)',
         background: 'linear-gradient(135deg, rgba(0,163,255,0.1), rgba(0,255,200,0.05))',
         border: '1px solid rgba(0,163,255,0.2)',
       }}>
-        <div style={{ fontSize: '13px', fontWeight: 700, marginBottom: '6px' }}>💰 Revenue Share Referral</div>
-        <div style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: 1.6 }}>
-          Invite other creators and earn <strong style={{ color: 'var(--ton)' }}>{RS_PCT}%</strong> of their
-          subscription fees — sent <strong style={{ color: 'var(--ton)' }}>directly to your TON wallet</strong> every time a fan pays.
+        <div style={{ fontSize: '13px', fontWeight: 700, marginBottom: '8px' }}>💰 Revenue Share Referral</div>
+        <div style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: 1.7 }}>
+          Invite other creators to TON-PASS. Every time one of their fans pays,{' '}
+          <strong style={{ color: 'var(--ton)' }}>{RS_PCT}% of the platform fee</strong> goes{' '}
+          <strong style={{ color: 'var(--ton)' }}>directly to your TON wallet</strong> — instantly, forever.
+        </div>
+        <div style={{ marginTop: '10px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+          {[
+            `Fan pays 100 TON`,
+            `→ Platform fee 5 TON`,
+            `→ You get ${(5 * RS_PCT / 100).toFixed(2)} TON`,
+          ].map((s, i) => (
+            <span key={i} style={{
+              fontSize: '10px', padding: '3px 8px', borderRadius: '10px',
+              background: i === 2 ? 'rgba(0,163,255,0.15)' : 'var(--bg-elevated)',
+              color: i === 2 ? 'var(--ton)' : 'var(--text-muted)',
+              fontFamily: 'JetBrains Mono',
+            }}>{s}</span>
+          ))}
         </div>
       </div>
 
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-        <div className="card" style={{ padding: '12px', textAlign: 'center' }}>
-          <div style={{ fontFamily: 'JetBrains Mono', fontSize: '18px', fontWeight: 700, color: 'var(--ton)' }}>
-            {(data.stats?.totalEarnedTon || 0).toFixed(2)}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+        <div className="card" style={{ padding: '14px', textAlign: 'center' }}>
+          <div style={{ fontFamily: 'JetBrains Mono', fontSize: '26px', fontWeight: 700 }}>
+            {referredCreators.length}
           </div>
-          <div style={{ fontSize: '9px', color: 'var(--text-muted)', marginTop: '2px' }}>TOTAL TON</div>
+          <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>TOTAL INVITED</div>
         </div>
-        <div className="card" style={{ padding: '12px', textAlign: 'center' }}>
-          <div style={{ fontFamily: 'JetBrains Mono', fontSize: '18px', fontWeight: 700, color: 'var(--green)' }}>
-            {(data.stats?.thisMonthEarnedTon || 0).toFixed(2)}
+        <div className="card" style={{ padding: '14px', textAlign: 'center' }}>
+          <div style={{ fontFamily: 'JetBrains Mono', fontSize: '26px', fontWeight: 700, color: 'var(--green)' }}>
+            {activeCount}
           </div>
-          <div style={{ fontSize: '9px', color: 'var(--text-muted)', marginTop: '2px' }}>THIS MONTH</div>
-        </div>
-        <div className="card" style={{ padding: '12px', textAlign: 'center' }}>
-          <div style={{ fontFamily: 'JetBrains Mono', fontSize: '18px', fontWeight: 700 }}>
-            {data.stats?.referredCount || 0}
-          </div>
-          <div style={{ fontSize: '9px', color: 'var(--text-muted)', marginTop: '2px' }}>INVITED</div>
+          <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>ACTIVE NOW</div>
         </div>
       </div>
 
       {/* Direct to wallet notice */}
       <div style={{
-        padding: '12px 14px', borderRadius: 'var(--radius-sm)',
+        padding: '11px 14px', borderRadius: 'var(--radius-sm)',
         background: 'rgba(0,255,136,0.05)', border: '1px solid rgba(0,255,136,0.2)',
         display: 'flex', alignItems: 'center', gap: '10px',
       }}>
-        <div style={{ fontSize: '20px' }}>⚡</div>
+        <span style={{ fontSize: '18px' }}>⚡</span>
         <div style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-          Your share is sent <strong style={{ color: 'var(--green)' }}>directly to your TON wallet</strong> at the moment each fan pays — no withdrawal needed.
+          Payments go <strong style={{ color: 'var(--green)' }}>directly to your wallet</strong> — no withdrawal, no delay.
         </div>
       </div>
 
       {/* Invite link */}
-      <div style={{ padding: '14px', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
-        <div style={{ fontSize: '12px', fontWeight: 700, marginBottom: '10px' }}>🔗 Your Creator Invite Link</div>
-        <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '8px' }}>
-          Creators who sign up via this link share <strong style={{ color: 'var(--ton)' }}>{RS_PCT}%</strong> of their fees with you — for life
+      <div style={{ padding: '14px', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div>
+          <div style={{ fontSize: '12px', fontWeight: 700, marginBottom: '4px' }}>🔗 Your Invite Link</div>
+          <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+            Creators who join via this link share <strong style={{ color: 'var(--ton)' }}>{RS_PCT}%</strong> of their fees with you — for life
+          </div>
         </div>
         <div style={{
-          display: 'flex', gap: '8px', alignItems: 'center',
-          background: 'var(--bg-elevated)', borderRadius: 'var(--radius-sm)', padding: '8px 10px',
-          marginBottom: '8px',
+          padding: '8px 10px', borderRadius: 'var(--radius-sm)',
+          background: 'var(--bg-elevated)',
+          fontFamily: 'JetBrains Mono', fontSize: '11px', color: 'var(--ton)',
+          letterSpacing: '0.05em',
         }}>
-          <span style={{ fontSize: '10px', fontFamily: 'JetBrains Mono', color: 'var(--ton)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            Code: {data.inviteCode}
-          </span>
+          {data.inviteCode}
         </div>
         <button className="btn btn-primary btn-full btn-sm" onClick={onCopyInvite}>
           {inviteCopied ? '✓ Copied!' : '📋 Copy Invite Link'}
         </button>
+        {data.signupCount > 0 && (
+          <div style={{ fontSize: '10px', color: 'var(--text-muted)', textAlign: 'center' }}>
+            {data.signupCount} creator{data.signupCount !== 1 ? 's' : ''} joined via this link
+          </div>
+        )}
       </div>
 
-      {/* Referred creators list */}
-      {data.referredCreators?.length > 0 && (
+      {/* Invited creators list */}
+      {referredCreators.length > 0 ? (
         <div>
-          <div style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>👥 Invited Creators ({data.referredCreators.length})</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {data.referredCreators.map((rc: any) => (
-              <div key={rc.id} className="card" style={{ padding: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <div style={{ fontSize: '13px', fontWeight: 600 }}>
-                      {rc.public_profile_name || rc.telegram_channel_name || 'Creator'}
-                    </div>
-                    <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                      Joined {new Date(rc.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                    </div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', fontWeight: 700, color: 'var(--ton)' }}>
-                      +{(rc.total_earned_ton || 0).toFixed(4)}
-                    </div>
-                    <div style={{ fontSize: '9px', color: 'var(--text-muted)' }}>
-                      this month +{(rc.this_month_earned_ton || 0).toFixed(4)} TON
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>
+            👥 Invited Creators ({referredCreators.length})
           </div>
-        </div>
-      )}
-
-      {/* Recent earnings */}
-      {data.recentEarnings?.length > 0 && (
-        <div>
-          <div style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>📋 Recent Earnings</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            {data.recentEarnings.slice(0, 10).map((e: any) => (
-              <div key={e.id} style={{
+            {referredCreators.map((rc: any) => (
+              <div key={rc.id} style={{
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                padding: '8px 12px', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm)',
-                border: '1px solid var(--border)',
+                padding: '10px 12px', background: 'var(--bg-card)',
+                borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
               }}>
                 <div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                    {e.share_pct}% of {(e.source_fee_ton || 0).toFixed(4)} TON fee
-                  </div>
-                  <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '1px' }}>
-                    {new Date(e.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  <div style={{ fontSize: '13px', fontWeight: 600 }}>{rc.name}</div>
+                  <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                    Joined {new Date(rc.joinedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </div>
                 </div>
-                <div style={{ fontFamily: 'JetBrains Mono', fontSize: '13px', fontWeight: 700, color: 'var(--green)' }}>
-                  +{(e.share_ton || 0).toFixed(4)} TON
-                </div>
+                <span style={{
+                  fontSize: '10px', padding: '3px 8px', borderRadius: '10px',
+                  background: rc.isActive ? 'rgba(0,255,136,0.1)' : 'var(--bg-elevated)',
+                  color: rc.isActive ? 'var(--green)' : 'var(--text-muted)',
+                }}>
+                  {rc.isActive ? 'Active' : 'Inactive'}
+                </span>
               </div>
             ))}
           </div>
         </div>
-      )}
-
-      {/* Empty state */}
-      {(!data.referredCreators || data.referredCreators.length === 0) && (
+      ) : (
         <div style={{ textAlign: 'center', padding: '32px 24px', color: 'var(--text-muted)', fontSize: '13px' }}>
           <div style={{ fontSize: '36px', marginBottom: '12px' }}>🚀</div>
           <div style={{ fontWeight: 600, marginBottom: '6px' }}>No invited creators yet</div>
           <div style={{ fontSize: '11px' }}>
             Share your invite link with fellow creators.<br />
-            You'll earn {RS_PCT}% of their fees automatically, forever.
+            You'll earn {RS_PCT}% of their platform fees — directly to your wallet.
           </div>
         </div>
       )}
