@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
   if (!existingCreator && referrerInviteCode) {
     const { data: inviteLink } = await supabaseAdmin
       .from('creator_referral_links')
-      .select('id, referrer_creator_id')
+      .select('id, referrer_creator_id, signup_count')
       .eq('invite_code', referrerInviteCode.toUpperCase())
       .single();
 
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
       // 초대 링크 사용 횟수 증가
       await supabaseAdmin
         .from('creator_referral_links')
-        .update({ signup_count: inviteLink.signup_count + 1 } as any)
+        .update({ signup_count: (inviteLink.signup_count || 0) + 1 } as any)
         .eq('id', inviteLink.id);
     }
   }
