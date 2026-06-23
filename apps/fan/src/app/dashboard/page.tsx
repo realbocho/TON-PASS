@@ -25,7 +25,7 @@ interface Stats {
   totalRevenue: number;
 }
 
-type Tab = 'pending' | 'active' | 'expiring';
+type Tab = 'pending' | 'active' | 'expiring' | 'revenue';
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
@@ -40,6 +40,8 @@ export default function DashboardPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [creator, setCreator] = useState<any>(null);
   const [copied, setCopied] = useState(false);
+  const [revenueShare, setRevenueShare] = useState<any>(null);
+  const [inviteCopied, setInviteCopied] = useState(false);
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
 
@@ -63,6 +65,13 @@ export default function DashboardPage() {
       setActive(data.active);
       setExpiring(data.expiringSoon);
       setStats(data.stats);
+
+      // Revenue share 데이터 로드
+      const rsRes = await fetch('/api/creator/revenue-share/invite');
+      if (rsRes.ok) {
+        const rsData = await rsRes.json();
+        setRevenueShare(rsData);
+      }
     } catch {
     } finally {
       setLoading(false);
@@ -178,9 +187,20 @@ export default function DashboardPage() {
     { id: 'pending' as Tab, label: 'Pending', count: stats?.pendingCount || 0, dot: 'var(--yellow)' },
     { id: 'active' as Tab, label: 'Active', count: stats?.activeCount || 0, dot: 'var(--green)' },
     { id: 'expiring' as Tab, label: 'Expiring', count: stats?.expiringSoonCount || 0, dot: 'var(--red)' },
+    { id: 'revenue' as Tab, label: '💰 Share', count: revenueShare?.stats?.referredCount || 0, dot: 'var(--ton)' },
   ];
 
-  const currentList = tab === 'pending' ? pending : tab === 'active' ? active : expiring;
+  function copyInviteLink() {
+    if (revenueShare?.inviteCode) {
+      const botName = process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || 'TON_pass_bot';
+      const inviteUrl = `https://t.me/${botName}/tps?startapp=ref-${revenueShare.inviteCode}`;
+      navigator.clipboard?.writeText(inviteUrl);
+      setInviteCopied(true);
+      setTimeout(() => setInviteCopied(false), 2000);
+    }
+  }
+
+  const currentList = tab === 'pending' ? pending : tab === 'active' ? active : tab === 'expiring' ? expiring : [];
 
   return (
     <main style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
@@ -259,7 +279,7 @@ export default function DashboardPage() {
 
       {/* List */}
       <div style={{ flex: 1, padding: '12px 16px 24px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {currentList.length === 0 && (
+        {tab !== 'revenue' && currentList.length === 0 && (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px', padding: '48px 24px', textAlign: 'center' }}>
             <div style={{ fontSize: '40px' }}>
               {tab === 'pending' ? '⏳' : tab === 'active' ? '✅' : '🔔'}
@@ -292,6 +312,14 @@ export default function DashboardPage() {
             loading={actionLoading === p.id}
           />
         ))}
+
+        {tab === 'revenue' && (
+          <RevenueSharePanel
+            data={revenueShare}
+            onCopyInvite={copyInviteLink}
+            inviteCopied={inviteCopied}
+          />
+        )}
       </div>
 
       {/* Bottom hint */}
@@ -442,6 +470,179 @@ function LoadingScreen() {
         <div className="spinner" style={{ margin: '0 auto 12px' }} />
         <div style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Loading dashboard…</div>
       </div>
+    </div>
+  );
+}
+
+// ============================================
+// Revenue Share Panel
+// ============================================
+function RevenueSharePanel({
+  data,
+  onCopyInvite,
+  inviteCopied,
+}: {
+  data: any;
+  onCopyInvite: () => void;
+  inviteCopied: boolean;
+}) {
+  if (!data) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px 24px' }}>
+        <div className="spinner" />
+      </div>
+    );
+  }
+
+  const RS_PCT = data.revenueSharePct ?? 20;
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+
+      {/* 설명 배너 */}
+      <div style={{
+        padding: '14px', borderRadius: 'var(--radius-sm)',
+        background: 'linear-gradient(135deg, rgba(0,163,255,0.1), rgba(0,255,200,0.05))',
+        border: '1px solid rgba(0,163,255,0.2)',
+      }}>
+        <div style={{ fontSize: '13px', fontWeight: 700, marginBottom: '6px' }}>💰 수수료 쉐어 레퍼럴</div>
+        <div style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: 1.6 }}>
+          다른 크리에이터를 초대하면, 그 크리에이터의 구독 수수료 중 <strong style={{ color: 'var(--ton)' }}>{RS_PCT}%</strong>를
+          매달 자동으로 적립받습니다. 초대한 크리에이터가 클수록, 내 수익도 무한히 커집니다.
+        </div>
+      </div>
+
+      {/* 수익 통계 */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+        <div className="card" style={{ padding: '12px', textAlign: 'center' }}>
+          <div style={{ fontFamily: 'JetBrains Mono', fontSize: '18px', fontWeight: 700, color: 'var(--ton)' }}>
+            {(data.stats?.totalEarnedTon || 0).toFixed(2)}
+          </div>
+          <div style={{ fontSize: '9px', color: 'var(--text-muted)', marginTop: '2px' }}>누적 TON</div>
+        </div>
+        <div className="card" style={{ padding: '12px', textAlign: 'center' }}>
+          <div style={{ fontFamily: 'JetBrains Mono', fontSize: '18px', fontWeight: 700, color: 'var(--green)' }}>
+            {(data.stats?.thisMonthEarnedTon || 0).toFixed(2)}
+          </div>
+          <div style={{ fontSize: '9px', color: 'var(--text-muted)', marginTop: '2px' }}>이번달 TON</div>
+        </div>
+        <div className="card" style={{ padding: '12px', textAlign: 'center' }}>
+          <div style={{ fontFamily: 'JetBrains Mono', fontSize: '18px', fontWeight: 700 }}>
+            {data.stats?.referredCount || 0}
+          </div>
+          <div style={{ fontSize: '9px', color: 'var(--text-muted)', marginTop: '2px' }}>초대한 크리에이터</div>
+        </div>
+      </div>
+
+      {/* 미지급 잔액 */}
+      {(data.pendingTon || 0) > 0 && (
+        <div style={{
+          padding: '14px', borderRadius: 'var(--radius-sm)',
+          background: 'rgba(0,255,136,0.05)', border: '1px solid rgba(0,255,136,0.2)',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        }}>
+          <div>
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>미지급 잔액</div>
+            <div style={{ fontFamily: 'JetBrains Mono', fontSize: '20px', fontWeight: 700, color: 'var(--green)' }}>
+              {(data.pendingTon || 0).toFixed(4)} TON
+            </div>
+          </div>
+          <div style={{ fontSize: '11px', color: 'var(--text-muted)', textAlign: 'right' }}>
+            출금 기능<br/>준비 중
+          </div>
+        </div>
+      )}
+
+      {/* 내 초대 링크 */}
+      <div style={{ padding: '14px', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
+        <div style={{ fontSize: '12px', fontWeight: 700, marginBottom: '10px' }}>🔗 내 크리에이터 초대 링크</div>
+        <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '8px' }}>
+          이 링크로 가입한 크리에이터의 수수료 <strong style={{ color: 'var(--ton)' }}>{RS_PCT}%</strong>가 평생 적립됩니다
+        </div>
+        <div style={{
+          display: 'flex', gap: '8px', alignItems: 'center',
+          background: 'var(--bg-elevated)', borderRadius: 'var(--radius-sm)', padding: '8px 10px',
+          marginBottom: '8px',
+        }}>
+          <span style={{ fontSize: '10px', fontFamily: 'JetBrains Mono', color: 'var(--ton)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            코드: {data.inviteCode}
+          </span>
+        </div>
+        <button className="btn btn-primary btn-full btn-sm" onClick={onCopyInvite}>
+          {inviteCopied ? '✓ 복사됨!' : '📋 초대 링크 복사'}
+        </button>
+      </div>
+
+      {/* 초대한 크리에이터 목록 */}
+      {data.referredCreators?.length > 0 && (
+        <div>
+          <div style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>👥 초대한 크리에이터 ({data.referredCreators.length})</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {data.referredCreators.map((rc: any) => (
+              <div key={rc.id} className="card" style={{ padding: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ fontSize: '13px', fontWeight: 600 }}>
+                      {rc.public_profile_name || rc.telegram_channel_name || '크리에이터'}
+                    </div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                      가입일: {new Date(rc.created_at).toLocaleDateString('ko-KR')}
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', fontWeight: 700, color: 'var(--ton)' }}>
+                      +{(rc.total_earned_ton || 0).toFixed(4)}
+                    </div>
+                    <div style={{ fontSize: '9px', color: 'var(--text-muted)' }}>
+                      이번달 +{(rc.this_month_earned_ton || 0).toFixed(4)} TON
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 최근 수익 내역 */}
+      {data.recentEarnings?.length > 0 && (
+        <div>
+          <div style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>📋 최근 수익 내역</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {data.recentEarnings.slice(0, 10).map((e: any) => (
+              <div key={e.id} style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                padding: '8px 12px', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--border)',
+              }}>
+                <div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                    수수료 {(e.source_fee_ton || 0).toFixed(4)} TON의 {e.share_pct}%
+                  </div>
+                  <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '1px' }}>
+                    {new Date(e.created_at).toLocaleDateString('ko-KR')}
+                  </div>
+                </div>
+                <div style={{ fontFamily: 'JetBrains Mono', fontSize: '13px', fontWeight: 700, color: 'var(--green)' }}>
+                  +{(e.share_ton || 0).toFixed(4)} TON
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 아직 초대한 크리에이터 없음 */}
+      {(!data.referredCreators || data.referredCreators.length === 0) && (
+        <div style={{ textAlign: 'center', padding: '32px 24px', color: 'var(--text-muted)', fontSize: '13px' }}>
+          <div style={{ fontSize: '36px', marginBottom: '12px' }}>🚀</div>
+          <div style={{ fontWeight: 600, marginBottom: '6px' }}>아직 초대한 크리에이터가 없어요</div>
+          <div style={{ fontSize: '11px' }}>
+            위 초대 링크를 동료 크리에이터에게 공유하면<br />
+            그들의 수수료 수익 {RS_PCT}%가 평생 자동으로 적립됩니다
+          </div>
+        </div>
+      )}
     </div>
   );
 }
