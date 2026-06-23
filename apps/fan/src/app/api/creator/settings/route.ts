@@ -31,6 +31,8 @@ export async function PATCH(req: NextRequest) {
     'reviews_enabled',
     'review_bonus_days',
     'show_in_ranking',
+    'revenue_share_enabled',
+    'revenue_share_pct',
   ];
 
   const filtered = Object.fromEntries(
