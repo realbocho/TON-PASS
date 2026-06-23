@@ -508,7 +508,7 @@ function RevenueSharePanel({
         <div style={{ fontSize: '13px', fontWeight: 700, marginBottom: '6px' }}>💰 Revenue Share Referral</div>
         <div style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: 1.6 }}>
           Invite other creators and earn <strong style={{ color: 'var(--ton)' }}>{RS_PCT}%</strong> of their
-          subscription fees — automatically, every month, forever.
+          subscription fees — sent <strong style={{ color: 'var(--ton)' }}>directly to your TON wallet</strong> every time a fan pays.
         </div>
       </div>
 
@@ -534,24 +534,17 @@ function RevenueSharePanel({
         </div>
       </div>
 
-      {/* Pending balance */}
-      {(data.pendingTon || 0) > 0 && (
-        <div style={{
-          padding: '14px', borderRadius: 'var(--radius-sm)',
-          background: 'rgba(0,255,136,0.05)', border: '1px solid rgba(0,255,136,0.2)',
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        }}>
-          <div>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Pending Balance</div>
-            <div style={{ fontFamily: 'JetBrains Mono', fontSize: '20px', fontWeight: 700, color: 'var(--green)' }}>
-              {(data.pendingTon || 0).toFixed(4)} TON
-            </div>
-          </div>
-          <div style={{ fontSize: '11px', color: 'var(--text-muted)', textAlign: 'right' }}>
-            Withdrawal<br/>coming soon
-          </div>
+      {/* Direct to wallet notice */}
+      <div style={{
+        padding: '12px 14px', borderRadius: 'var(--radius-sm)',
+        background: 'rgba(0,255,136,0.05)', border: '1px solid rgba(0,255,136,0.2)',
+        display: 'flex', alignItems: 'center', gap: '10px',
+      }}>
+        <div style={{ fontSize: '20px' }}>⚡</div>
+        <div style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+          Your share is sent <strong style={{ color: 'var(--green)' }}>directly to your TON wallet</strong> at the moment each fan pays — no withdrawal needed.
         </div>
-      )}
+      </div>
 
       {/* Invite link */}
       <div style={{ padding: '14px', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
